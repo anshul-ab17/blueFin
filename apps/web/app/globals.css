@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme {
+  --color-abyss: #0a141f;
+  --color-deep: #060e18;
+  --color-panel: #101f30;
+  --color-panel-2: #0f2135;
+  --color-line: #1c3247;
+  --color-line-2: #2a3a4d;
+  --color-line-3: #14273c;
+  --color-fg: #eaf1f8;
+  --color-soft-fg: #c7d6e6;
+  --color-muted: #93a7bc;
+  --color-dim: #5c7188;
+  --color-faint: #3d5268;
+  --color-accent: #4d9fff;
+  --color-accent-soft: #7db4ff;
+  --color-btn: #1b3a6b;
+  --color-btn-border: #2f5fa8;
+  --color-no: #d98b8b;
+  --color-live: #22c55e;
+  --color-win: #4ade80;
+
+  --font-heading: var(--font-space-grotesk), sans-serif;
+  --font-body: var(--font-manrope), sans-serif;
+
+  --animate-livepulse: livepulse 1.4s infinite;
+  --animate-bobfloat: bobfloat 3s ease-in-out infinite;
+  --animate-waverotate: waverotate 9s linear infinite;
+  --animate-waverotate-rev: waverotate 13s linear infinite reverse;
+
+  @keyframes livepulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+  @keyframes bobfloat {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-16px) rotate(2deg); }
+  }
+  @keyframes waverotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+}
+
+body {
+  background: var(--color-abyss);
+  color: var(--color-fg);
+  font-family: var(--font-body);
+}
+
+::selection {
+  background: #2f6fed;
+  color: #fff;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.orca-tint {
+  filter: invert(0.45) sepia(0.4) saturate(1.6) hue-rotate(175deg);
+}
