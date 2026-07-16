@@ -43,6 +43,43 @@
   }
 }
 
+@keyframes lineup {
+  from { transform: translateY(110%); }
+  to { transform: translateY(0); }
+}
+@keyframes risein {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes kenburns {
+  from { transform: scale(1.02); }
+  to { transform: scale(1.14); }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes scrollhint {
+  0%, 100% { transform: translateY(0); opacity: 0.9; }
+  50% { transform: translateY(8px); opacity: 0.4; }
+}
+
+/* Masked line reveal: wrap text in .line-mask > .line-up */
+.line-mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 4px;
+}
+.line-up {
+  display: block;
+  transform: translateY(110%);
+  animation: lineup 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.rise-in {
+  opacity: 0;
+  animation: risein 0.7s ease forwards;
+}
+
 body {
   background: var(--color-abyss);
   color: var(--color-fg);
