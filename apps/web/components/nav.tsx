@@ -42,7 +42,7 @@ export default function Nav() {
   };
 
   return (
-    <div className="sticky top-0 z-50 flex items-center justify-between px-10 py-4 bg-[rgba(13,27,42,0.94)] backdrop-blur-[10px] border-b border-line">
+    <div className="sticky top-0 z-50 flex items-center justify-between px-10 py-3.5 bg-[rgba(11,22,35,0.78)] backdrop-blur-[14px] border-b border-line">
       <Link href="/" className="flex items-center gap-2.5 no-underline">
         <img
           src="/assets/bluefin-orca.svg"
@@ -57,7 +57,7 @@ export default function Nav() {
           {isHome ? (
             <>
               <NavButton href="/#about-section" label="About" active={false} />
-              <NavButton href="/#how-it-works" label="How It Work" active={false} />
+              <NavButton href="/#how-it-works" label="How It Works" active={false} />
               <NavButton href="/#faq-section" label="FAQ" active={false} />
             </>
           ) : (
@@ -87,7 +87,7 @@ export default function Nav() {
         ) : (
           <button
             onClick={openAuth}
-            className="relative bg-[#e5484d] border-2 border-white text-white font-heading font-bold text-[10px] tracking-[1.8px] px-[19px] py-2.5 cursor-pointer"
+            className="relative m-0.5 bg-[#e8503a] border-2 border-[#b93a28] text-white font-heading font-bold text-[10px] tracking-[1.8px] px-5 py-[11px] rounded-none cursor-pointer shadow-[0_0_0_1.5px_#ffffff] hover:bg-[#f0604a] hover:shadow-[0_0_0_1.5px_#ffffff,0_6px_18px_rgba(232,80,58,0.35)] transition-all"
           >
             CONNECT WALLET
           </button>
