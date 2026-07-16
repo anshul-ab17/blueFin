@@ -4,6 +4,7 @@ import "./globals.css";
 import Nav from "@/components/nav";
 import AuthModal from "@/components/auth-modal";
 import Toast from "@/components/toast";
+import Providers from "@/components/providers";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -31,10 +32,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${manrope.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-abyss text-fg">
-        <Nav />
-        <main className="flex-1">{children}</main>
-        <AuthModal />
-        <Toast />
+        <Providers>
+          <Nav />
+          <main className="flex-1">{children}</main>
+          <AuthModal />
+          <Toast />
+        </Providers>
       </body>
     </html>
   );

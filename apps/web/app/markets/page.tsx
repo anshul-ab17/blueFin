@@ -1,12 +1,25 @@
+"use client";
+
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import type { MatchEvent } from "@bluefin/types";
 import TeamBadge from "@/components/team-badge";
 import LiveDot from "@/components/live-dot";
 import { EVENTS } from "@/lib/data";
 
-export const metadata = { title: "Markets — Bluefin" };
-
 export default function MarketsPage() {
-  const cards = EVENTS.flatMap((ev) =>
+  // ponytail: initialData keeps first paint instant; swap for pure fetch once a real backend exists
+  const { data: events } = useQuery<MatchEvent[]>({
+    queryKey: ["markets"],
+    queryFn: async () => {
+      const res = await fetch("/api/markets");
+      if (!res.ok) throw new Error("failed to load markets");
+      return res.json();
+    },
+    initialData: EVENTS,
+  });
+
+  const cards = events.flatMap((ev) =>
     ev.categories.map((cat) => {
       const top = cat.outcomes.reduce((a, b) => (b.pct > a.pct ? b : a), cat.outcomes[0]);
       return { ev, cat, top };
