@@ -2,7 +2,7 @@
 
 > **The Home of World Cup Predictions** — Powered by TxLINE
 
-Bluefin is a decentralized football prediction exchange powered by real-time TxLINE data and trustless Solana settlement. See [`docs/Bluefin_SDD_MVP.md`](../docs/Bluefin_SDD_MVP.md) for the full software design document.
+Bluefin is a decentralized football prediction exchange powered by real-time TxLINE data and trustless Solana settlement. See [`Readme.md`](/README.md) for the full software design document.
 
 ## Monorepo
 

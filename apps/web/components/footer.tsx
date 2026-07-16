@@ -50,7 +50,7 @@ export default function Footer() {
             </div>
           </div>
           <div>
-            <div className="font-bold text-[13px] text-fg mb-3.5">Stay in the Loop</div>
+            <div className="font-bold text-[13px] text-fg mb-3.5">Stay in the Ocean</div>
             <div className="font-medium text-[13px] text-dim mb-3">Get market updates and protocol news.</div>
             <div className="flex gap-2">
               <input
