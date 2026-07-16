@@ -1,9 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ConnectionProvider, WalletProvider, useWallet } from "@solana/wallet-adapter-react";
+import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
+import { clusterApiUrl } from "@solana/web3.js";
+import { useAppStore } from "@/lib/store";
+
+function WalletSync({ children }: { children: React.ReactNode }) {
+  const { publicKey, connected } = useWallet();
+  const setWallet = useAppStore((s) => s.setWallet);
+
+  useEffect(() => {
+    if (connected && publicKey) {
+      const addr = publicKey.toBase58();
+      setWallet(`${addr.slice(0, 4)}...${addr.slice(-4)}`);
+    }
+  }, [connected, publicKey, setWallet]);
+
+  return <>{children}</>;
+}
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  const [wallets] = useState(() => [new PhantomWalletAdapter()]);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ConnectionProvider endpoint={clusterApiUrl("devnet")}>
+        <WalletProvider wallets={wallets}>
+          <WalletSync>{children}</WalletSync>
+        </WalletProvider>
+      </ConnectionProvider>
+    </QueryClientProvider>
+  );
 }

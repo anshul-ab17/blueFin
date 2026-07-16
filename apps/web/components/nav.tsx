@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { useAppStore } from "@/lib/store";
-import { WALLET_ADDRESS, WALLET_BALANCE } from "@/lib/data";
+import { WALLET_BALANCE } from "@/lib/data";
 
 const APP_LINKS = [
   { href: "/markets", label: "Markets" },
@@ -30,8 +31,15 @@ export default function Nav() {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const walletConnected = useAppStore((s) => s.walletConnected);
+  const walletAddress = useAppStore((s) => s.walletAddress);
   const openAuth = useAppStore((s) => s.openAuth);
   const disconnect = useAppStore((s) => s.disconnect);
+  const { disconnect: disconnectAdapter, connected: adapterConnected } = useWallet();
+
+  const handleDisconnect = () => {
+    if (adapterConnected) void disconnectAdapter();
+    disconnect();
+  };
 
   return (
     <div className="sticky top-0 z-50 flex items-center justify-between px-10 py-4 bg-[rgba(13,27,42,0.94)] backdrop-blur-[10px] border-b border-line">
@@ -64,10 +72,10 @@ export default function Nav() {
           )}
         </div>
         {walletConnected ? (
-          <button onClick={disconnect} className="flex items-center gap-3 cursor-pointer bg-transparent border-none">
+          <button onClick={handleDisconnect} className="flex items-center gap-3 cursor-pointer bg-transparent border-none">
             <span className="text-right leading-[1.2]">
               <span className="block font-heading font-bold text-[13px] text-fg">{WALLET_BALANCE}</span>
-              <span className="block font-semibold text-[11px] text-dim">{WALLET_ADDRESS}</span>
+              <span className="block font-semibold text-[11px] text-dim">{walletAddress}</span>
             </span>
             <span className="w-[34px] h-[34px] rounded-full bg-[#16283b] border border-btn-border flex items-center justify-center">
               <svg width="16" height="20" viewBox="0 0 22 28" fill="none" xmlns="http://www.w3.org/2000/svg">

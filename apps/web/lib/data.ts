@@ -198,4 +198,3 @@ export const WALLET_OPTIONS = [
 ];
 
 export const WALLET_BALANCE = "1,250 USDC";
-export const WALLET_ADDRESS = "7xKt...9pQ";

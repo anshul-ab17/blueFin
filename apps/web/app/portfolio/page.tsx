@@ -1,15 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import { useWallet } from "@solana/wallet-adapter-react";
 import ConnectPrompt from "@/components/connect-prompt";
 import StatBox from "@/components/stat-box";
 import { useAppStore } from "@/lib/store";
-import { WALLET_ADDRESS, WALLET_BALANCE } from "@/lib/data";
+import { WALLET_BALANCE } from "@/lib/data";
 
 export default function PortfolioPage() {
   const walletConnected = useAppStore((s) => s.walletConnected);
+  const walletAddress = useAppStore((s) => s.walletAddress);
   const disconnect = useAppStore((s) => s.disconnect);
   const bets = useAppStore((s) => s.bets);
+  const { disconnect: disconnectAdapter, connected: adapterConnected } = useWallet();
+
+  const handleDisconnect = () => {
+    if (adapterConnected) void disconnectAdapter();
+    disconnect();
+  };
 
   const totalStaked = bets.reduce((a, b) => a + b.stake, 0);
   const totalPayout = bets.reduce((a, b) => a + b.payout, 0);
@@ -37,7 +45,7 @@ export default function PortfolioPage() {
               />
             </div>
             <div>
-              <div className="font-heading font-bold text-lg text-fg">{WALLET_ADDRESS}</div>
+              <div className="font-heading font-bold text-lg text-fg">{walletAddress}</div>
               <div className="font-semibold text-[13px] text-dim">Balance: {WALLET_BALANCE}</div>
             </div>
           </div>
@@ -54,7 +62,7 @@ export default function PortfolioPage() {
               View My Bets
             </Link>
             <button
-              onClick={disconnect}
+              onClick={handleDisconnect}
               className="flex-1 bg-transparent border border-line-2 text-muted font-heading font-bold text-sm p-3.5 rounded-[10px] cursor-pointer"
             >
               Disconnect

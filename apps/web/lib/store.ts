@@ -1,14 +1,18 @@
 import { create } from "zustand";
 import type { Bet } from "@bluefin/types";
 
+const MOCK_ADDRESS = "7xKt...9pQ";
+
 interface AppState {
   walletConnected: boolean;
+  walletAddress: string;
   authOpen: boolean;
   bets: Bet[];
   toast: string | null;
   openAuth: () => void;
   closeAuth: () => void;
   confirmAuth: () => void;
+  setWallet: (address: string) => void;
   disconnect: () => void;
   placeBet: (bet: Omit<Bet, "id" | "payout">) => void;
   flashToast: (msg: string) => void;
@@ -18,6 +22,7 @@ let toastTimer: ReturnType<typeof setTimeout> | undefined;
 
 export const useAppStore = create<AppState>((set) => ({
   walletConnected: false,
+  walletAddress: MOCK_ADDRESS,
   authOpen: false,
   bets: [
     { id: 1, event: "Argentina vs France", category: "Match Result", outcome: "Argentina", side: "YES", stake: 120, odds: 1.48, payout: 177.6 },
@@ -26,8 +31,9 @@ export const useAppStore = create<AppState>((set) => ({
   toast: null,
   openAuth: () => set({ authOpen: true }),
   closeAuth: () => set({ authOpen: false }),
-  confirmAuth: () => set({ walletConnected: true, authOpen: false }),
-  disconnect: () => set({ walletConnected: false }),
+  confirmAuth: () => set({ walletConnected: true, authOpen: false, walletAddress: MOCK_ADDRESS }),
+  setWallet: (address) => set({ walletConnected: true, authOpen: false, walletAddress: address }),
+  disconnect: () => set({ walletConnected: false, walletAddress: MOCK_ADDRESS }),
   placeBet: (bet) =>
     set((s) => ({
       bets: [{ ...bet, id: Date.now(), payout: bet.stake * bet.odds }, ...s.bets],

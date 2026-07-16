@@ -1,5 +1,7 @@
 "use client";
 
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletReadyState } from "@solana/wallet-adapter-base";
 import { useAppStore } from "@/lib/store";
 import { WALLET_OPTIONS } from "@/lib/data";
 
@@ -7,8 +9,27 @@ export default function AuthModal() {
   const authOpen = useAppStore((s) => s.authOpen);
   const closeAuth = useAppStore((s) => s.closeAuth);
   const confirmAuth = useAppStore((s) => s.confirmAuth);
+  const flashToast = useAppStore((s) => s.flashToast);
+  const { wallets, select } = useWallet();
 
   if (!authOpen) return null;
+
+  const connectWallet = async (name: string) => {
+    const phantom = wallets.find((w) => w.adapter.name === "Phantom");
+    if (name === "Phantom" && phantom && phantom.readyState === WalletReadyState.Installed) {
+      select(phantom.adapter.name);
+      try {
+        await phantom.adapter.connect();
+        // WalletSync in providers.tsx picks up the publicKey and updates the store
+      } catch {
+        flashToast("Wallet connection cancelled");
+      }
+      return;
+    }
+    // ponytail: non-Phantom wallets are demo-mode only; real adapters when needed
+    confirmAuth();
+    flashToast(name === "Phantom" ? "Phantom not detected — demo wallet connected" : "Demo wallet connected");
+  };
 
   return (
     <div className="fixed inset-0 z-[300] bg-[rgba(4,9,15,0.75)] flex items-center justify-center">
@@ -42,7 +63,7 @@ export default function AuthModal() {
           {WALLET_OPTIONS.map((w) => (
             <button
               key={w.name}
-              onClick={confirmAuth}
+              onClick={() => connectWallet(w.name)}
               className="w-full box-border flex items-center gap-3 bg-[#12181f] border border-[#1c2937] text-fg font-bold text-[13px] px-3.5 py-3 rounded-lg cursor-pointer"
             >
               <span className="text-base">{w.icon}</span>
