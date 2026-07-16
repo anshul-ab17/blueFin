@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
 import ConnectPrompt from "@/components/connect-prompt";
+import PageBackdrop from "@/components/page-backdrop";
 import StatBox from "@/components/stat-box";
 import { useAppStore } from "@/lib/store";
 import { WALLET_BALANCE } from "@/lib/data";
@@ -24,6 +25,7 @@ export default function PortfolioPage() {
 
   return (
     <div className="max-w-[760px] mx-auto px-10 pt-12 pb-20">
+      <PageBackdrop src="/assets/bg/water1.webp" />
       <h1 className="font-heading font-bold text-[30px] m-0 mb-1.5 text-fg">Portfolio</h1>
       <p className="font-medium text-[15px] text-muted m-0 mb-8">
         Your wallet, activity, and preferences on Bluefin.

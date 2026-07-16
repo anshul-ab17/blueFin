@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import PageBackdrop from "@/components/page-backdrop";
 import { PROOFS } from "@/lib/data";
 
 export default function ProofsPage() {
@@ -8,6 +9,7 @@ export default function ProofsPage() {
 
   return (
     <div className="max-w-[1000px] mx-auto px-10 pt-12 pb-20">
+      <PageBackdrop src="/assets/bg/water3.webp" />
       <h1 className="font-heading font-bold text-[30px] m-0 mb-1.5 text-fg">Stats & Proofs</h1>
       <p className="font-medium text-[15px] text-muted m-0 mb-8">
         Every settlement carries a cryptographic Merkle proof from TxLINE, anchored on Solana. No oracle trust

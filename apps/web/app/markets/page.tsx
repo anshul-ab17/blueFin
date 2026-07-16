@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { MatchEvent } from "@bluefin/types";
 import TeamBadge from "@/components/team-badge";
 import LiveDot from "@/components/live-dot";
+import PageBackdrop from "@/components/page-backdrop";
 import { EVENTS } from "@/lib/data";
 
 export default function MarketsPage() {
@@ -28,6 +29,7 @@ export default function MarketsPage() {
 
   return (
     <div className="max-w-[1280px] mx-auto px-10 pt-12 pb-20">
+      <PageBackdrop src="/assets/bg/water2.webp" />
       <div className="font-semibold text-[13px] text-accent tracking-[1px] uppercase mb-2">World Cup 2026</div>
       <h1 className="font-heading font-bold text-[34px] m-0 mb-1.5 text-fg">Active Markets</h1>
       <p className="font-medium text-[15px] text-muted m-0 mb-8">

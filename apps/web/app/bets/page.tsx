@@ -1,6 +1,7 @@
 "use client";
 
 import ConnectPrompt from "@/components/connect-prompt";
+import PageBackdrop from "@/components/page-backdrop";
 import StatBox from "@/components/stat-box";
 import { useAppStore } from "@/lib/store";
 
@@ -13,6 +14,7 @@ export default function BetsPage() {
 
   return (
     <div className="max-w-[1000px] mx-auto px-10 pt-12 pb-20">
+      <PageBackdrop src="/assets/bg/water4.webp" />
       <h1 className="font-heading font-bold text-[30px] m-0 mb-1.5 text-fg">My Bets</h1>
       <p className="font-medium text-[15px] text-muted m-0 mb-8">
         Positions are settled trustlessly on-chain once TxLINE confirms the match outcome.
@@ -22,7 +24,6 @@ export default function BetsPage() {
         <ConnectPrompt
           title="Connect your wallet to view your positions"
           subtitle="Your open bets, staked amounts, and settlement history will appear here."
-          showIcon
         />
       ) : (
         <>
