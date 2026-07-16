@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Footer from "@/components/footer";
 import LiveDot from "@/components/live-dot";
+import PageBackdrop from "@/components/page-backdrop";
 import TeamBadge from "@/components/team-badge";
 import { FAQS, LIVE_NOW } from "@/lib/data";
 
@@ -49,7 +50,8 @@ function Splash() {
       <div className="relative flex flex-col items-center gap-[18px]">
         <img src="/assets/bluefin-orca.svg" alt="Bluefin" className="w-[110px] h-[110px] object-contain orca-tint animate-bobfloat" />
         <div className="font-heading font-bold text-[22px] tracking-[8px] text-fg">BLUEFIN</div>
-        <div className="font-medium text-[13px] text-muted">Loading the markets…</div>
+        <div className="font-medium text-[13px] text-muted">The Home of World Cup</div>
+        <div className="font-medium text-[13px] text-muted">Predictions.</div>
       </div>
     </div>
   );
@@ -61,6 +63,7 @@ export default function Home() {
   return (
     <div>
       <Splash />
+      <PageBackdrop src="/assets/bg/water5.webp" opacity={0.3} />
 
       {/* HERO */}
       <div className="relative min-h-[680px] overflow-hidden">
@@ -78,8 +81,8 @@ export default function Home() {
               </span>
             </div>
             <h1 className="font-heading font-bold text-[54px] leading-[1.12] m-0 mb-[18px] text-white">
-              <span className="block">Predict the Future.</span>
-              <span className="block text-accent">Trade with Confidence.</span>
+              <span className="block">The Home of World Cup </span>
+              <span className="block text-accent">Predictions.</span>
             </h1>
             <p className="font-medium text-base leading-relaxed text-[#dbe6f0] m-0 mb-[30px] max-w-[480px]">
               Bluefin is a decentralized prediction market protocol for sports and real-world events. Backed by
@@ -245,7 +248,13 @@ export default function Home() {
         </div>
 
         {/* HOW IT WORKS */}
-        <div id="how-it-works" className="py-[88px] border-b border-line">
+        <div id="how-it-works" className="relative py-[88px] border-b border-line rounded-2xl overflow-hidden">
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: "url('/assets/bg/img8.webp')" }}
+          />
+          <div className="absolute inset-0 bg-[rgba(10,20,31,0.78)]" />
+          <div className="relative">
           <div className="text-center mb-12">
             <h2 className="font-heading font-bold text-[40px] m-0 mb-2.5 text-fg">How Bluefin Works</h2>
             <p className="font-medium text-base text-muted m-0">Simple. Transparent. Trustless.</p>
@@ -273,6 +282,7 @@ export default function Home() {
                 )
               )}
             </div>
+          </div>
           </div>
         </div>
 
