@@ -19,7 +19,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Bluefin — Predict the Future. Trade with Confidence.",
+  title: "Bluefin.",
   description:
     "Bluefin is a decentralized football prediction exchange powered by real-time TxLINE data and trustless Solana settlement.",
 };

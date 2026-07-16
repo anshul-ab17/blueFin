@@ -16,6 +16,7 @@ export default function Footer() {
               <span className="font-heading font-bold text-[15px] tracking-[3px] text-fg">BLUEFIN</span>
             </div>
             <div className="font-semibold text-[13px] text-accent-soft mb-2.5">Ride the Waves of Chance.</div>
+            <div className="font-semibold text-[13px] text-accent-soft mb-2.5">Trade the Game. Trust the Outcome.</div>
             <div className="font-medium text-[13px] leading-relaxed text-dim">
               Bluefin is a decentralized prediction market protocol for sports and real-world events. Trade with
               confidence. Settled on-chain.

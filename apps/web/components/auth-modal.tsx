@@ -41,12 +41,11 @@ export default function AuthModal() {
           ×
         </button>
         <div className="flex justify-between items-center mb-[22px]">
-          <span className="font-body font-bold text-[11px] tracking-[1.5px] text-dim">AUTH / 01</span>
           <span className="font-heading font-bold text-[11px] tracking-[1.5px] text-dim">BLUEFIN</span>
         </div>
         <div className="font-heading font-bold text-[22px] text-fg mb-2">Connect</div>
         <div className="font-bold text-[11px] tracking-[1px] text-dim mb-[22px]">
-          SIGN IN WITH GMAIL OR A WALLET
+          WITH GMAIL OR A WALLET
         </div>
         <button
           onClick={confirmAuth}
@@ -59,6 +58,12 @@ export default function AuthModal() {
           <span className="font-bold text-[11px] text-dim">OR</span>
           <div className="flex-1 h-px bg-[#1c2937]" />
         </div>
+
+        <div className="font-bold text-[11px] tracking-[1px] text-dim mb-[22px]">
+          CONNECT WITH WALLET
+        </div>
+
+
         <div className="flex flex-col gap-2.5 mb-[22px]">
           {WALLET_OPTIONS.map((w) => (
             <button
@@ -72,8 +77,7 @@ export default function AuthModal() {
           ))}
         </div>
         <div className="flex justify-between font-semibold text-[11px] text-faint">
-          <span>SECURED · OTP</span>
-          <span>V1.0</span>
+          <span>POWERED BY TXLINE</span> 
         </div>
       </div>
     </div>
