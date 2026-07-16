@@ -29,7 +29,7 @@ function NavButton({ href, label, active }: { href: string; label: string; activ
 
 export default function Nav() {
   const pathname = usePathname();
-  const isHome = pathname === "/";
+  const isHome = pathname === "/" || pathname === "/docs";
   const walletConnected = useAppStore((s) => s.walletConnected);
   const walletAddress = useAppStore((s) => s.walletAddress);
   const openAuth = useAppStore((s) => s.openAuth);
@@ -53,12 +53,13 @@ export default function Nav() {
       </Link>
       <div className="flex items-center gap-[30px]">
         <div className="flex items-center gap-5 uppercase">
-          <NavButton href="/" label="Home" active={isHome} />
+          <NavButton href="/" label="Home" active={pathname === "/"} />
           {isHome ? (
             <>
               <NavButton href="/#about-section" label="About" active={false} />
               <NavButton href="/#how-it-works" label="How It Works" active={false} />
               <NavButton href="/#faq-section" label="FAQ" active={false} />
+              <NavButton href="/docs" label="Docs" active={pathname === "/docs"} />
             </>
           ) : (
             APP_LINKS.map((l) => (
