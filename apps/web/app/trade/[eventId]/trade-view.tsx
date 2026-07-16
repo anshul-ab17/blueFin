@@ -5,8 +5,20 @@ import Link from "next/link";
 import type { MatchEvent, Outcome, Side } from "@bluefin/types";
 import TeamBadge from "@/components/team-badge";
 import LiveDot from "@/components/live-dot";
+import PageBackdrop from "@/components/page-backdrop";
+import { FillBar, Magnetic, Reveal } from "@/components/fx";
+import { RECENT_TRADES, SETTLEMENTS, TOP_TRADERS } from "@/lib/data";
 import { useAppStore } from "@/lib/store";
-import { EVENTS, RECENT_TRADES, SETTLEMENTS, TOP_TRADERS } from "@/lib/data";
+
+const QUICK_STAKES = [10, 25, 50, 100];
+
+function totalVolume(event: MatchEvent) {
+  const n = event.categories.reduce((sum, c) => {
+    const v = parseFloat(c.vol.replace(/[$,]/g, ""));
+    return sum + v * (c.vol.endsWith("M") ? 1e6 : c.vol.endsWith("K") ? 1e3 : 1);
+  }, 0);
+  return n >= 1e6 ? `$${(n / 1e6).toFixed(1)}M` : `$${Math.round(n / 1e3)}K`;
+}
 
 export default function TradeView({
   event,
@@ -15,291 +27,261 @@ export default function TradeView({
   event: MatchEvent;
   initialCategoryId?: string;
 }) {
-  const category =
+  const initialCategory =
     event.categories.find((c) => c.id === initialCategoryId) ?? event.categories[0];
-  const [activeCategoryId, setActiveCategoryId] = useState(category.id);
-  const activeCategory =
-    event.categories.find((c) => c.id === activeCategoryId) ?? event.categories[0];
-
-  const [slip, setSlip] = useState<{ label: string; side: Side; odds: number } | null>(null);
+  const [slip, setSlip] = useState({
+    category: initialCategory.label,
+    outcome: initialCategory.outcomes[0].label,
+    side: "YES" as Side,
+    odds: initialCategory.outcomes[0].yesOdds,
+  });
   const [stake, setStake] = useState(25);
+  const [placed, setPlaced] = useState(false);
 
   const walletConnected = useAppStore((s) => s.walletConnected);
   const placeBet = useAppStore((s) => s.placeBet);
   const flashToast = useAppStore((s) => s.flashToast);
 
-  const otherEvent = EVENTS.find((e) => e.id !== event.id);
   const isLive = event.status === "live";
 
-  const openSlip = (row: Outcome, side: Side) => {
+  const pick = (category: string, row: Outcome, side: Side) => {
+    setSlip({ category, outcome: row.label, side, odds: side === "YES" ? row.yesOdds : row.noOdds });
+    setPlaced(false);
+  };
+
+  const placeOrder = () => {
     if (!walletConnected) {
       flashToast("Connect your wallet to trade");
       return;
     }
-    setSlip({ label: row.label, side, odds: side === "YES" ? row.yesOdds : row.noOdds });
-    setStake(25);
-  };
-
-  const placeOrder = () => {
-    if (!slip) return;
     placeBet({
       event: `${event.teamA} vs ${event.teamB}`,
-      category: activeCategory.label,
-      outcome: slip.label,
+      category: slip.category,
+      outcome: slip.outcome,
       side: slip.side,
       stake,
       odds: slip.odds,
     });
-    setSlip(null);
-    flashToast(`Order placed — ${slip.side} ${slip.label}`);
+    setPlaced(true);
+    flashToast(`Order placed — ${slip.side} ${slip.outcome}`);
   };
 
   return (
-    <div>
-      {/* HERO */}
-      <div className="relative min-h-[340px] overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover"
-          style={{ backgroundImage: "url('/assets/whale.jpg')", backgroundPosition: "center 35%" }}
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,20,31,0.55)_0%,rgba(10,20,31,0.75)_60%,rgba(10,20,31,0.97)_100%)]" />
-        <div className="relative min-h-[340px] flex flex-col justify-between px-10 pt-[26px] pb-[34px] box-border">
-          <div className="font-semibold text-[13px] text-[#a9c3e0] tracking-[0.5px]">
-            TxODDS Powered — Ride the Waves of Chance.
-          </div>
-          <div>
-            {otherEvent && (
-              <div className="flex items-center gap-3 mb-3.5">
-                <Link
-                  href={`/trade/${otherEvent.id}`}
-                  className="flex items-center gap-2 bg-[rgba(16,31,48,0.7)] border border-line-2 !text-muted font-semibold text-[13px] px-4 py-2 rounded-[20px] cursor-pointer no-underline"
-                >
-                  <TeamBadge code={otherEvent.codeA} color={otherEvent.colorA} size="xs" />
-                  {otherEvent.teamA} vs {otherEvent.teamB}
-                  <TeamBadge code={otherEvent.codeB} color={otherEvent.colorB} size="xs" />
-                </Link>
-              </div>
-            )}
-            <div className="flex items-center gap-4 flex-wrap">
-              <h1 className="flex items-center gap-3 font-heading font-bold text-[30px] m-0 text-white">
-                <TeamBadge code={event.codeA} color={event.colorA} size="md" />
-                {event.teamA} vs {event.teamB}
-                <TeamBadge code={event.codeB} color={event.colorB} size="md" />
-              </h1>
-              {isLive ? (
-                <div className="flex items-center gap-2 bg-[rgba(34,197,94,0.15)] border border-live px-3.5 py-1.5 rounded-[20px]">
-                  <LiveDot />
-                  <span className="font-heading font-bold text-xs text-win">LIVE · {event.timeRemaining}</span>
-                </div>
+    <div className="max-w-[1280px] mx-auto px-10 pt-8 pb-20">
+      <PageBackdrop src="/assets/bg/water5.webp" />
+
+      {/* MATCH HEADER */}
+      <Reveal>
+        <div className="bg-panel border border-line rounded-2xl px-7 py-[22px] flex items-center justify-between mb-[22px]">
+          <div className="flex items-center gap-4">
+            <TeamBadge code={event.codeA} color={event.colorA} size="md" />
+            <div className="text-center">
+              {isLive && event.score ? (
+                <>
+                  <div className="font-heading font-bold text-[34px] leading-none text-white">
+                    {event.score.a} — {event.score.b}
+                  </div>
+                  <div className="font-semibold text-xs text-muted mt-1">{event.timeRemaining}</div>
+                </>
               ) : (
-                <div className="font-semibold text-[13px] text-[#a9c3e0]">{event.dateLabel}</div>
+                <div className="font-semibold text-sm text-muted">vs</div>
               )}
+            </div>
+            <TeamBadge code={event.codeB} color={event.colorB} size="md" />
+          </div>
+          <div className="text-center">
+            <div className="font-heading font-bold text-base text-fg">
+              {event.teamA} vs {event.teamB}
+            </div>
+            <div className="font-semibold text-xs text-dim">{event.dateLabel}</div>
+          </div>
+          <div className="flex items-center gap-3.5">
+            {isLive && (
+              <span className="inline-flex items-center gap-1.5 font-heading font-bold text-[11px] tracking-[1px] bg-[rgba(34,197,94,0.15)] border border-live text-win px-3 py-[5px] rounded-xl">
+                <LiveDot size={6} />
+                LIVE
+              </span>
+            )}
+            <div className="text-right">
+              <div className="font-semibold text-[11px] text-dim uppercase">Volume</div>
+              <div className="font-heading font-bold text-[15px] text-fg">{totalVolume(event)}</div>
             </div>
           </div>
         </div>
-      </div>
+      </Reveal>
 
-      <div className="max-w-[1280px] mx-auto px-10 pt-8 pb-20 grid grid-cols-[1.7fr_1fr] gap-6 items-stretch">
-        {/* LEFT COLUMN */}
-        <div className="flex flex-col">
-          <div className="flex gap-2.5 mb-5 flex-wrap">
-            {event.categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => {
-                  setActiveCategoryId(cat.id);
-                  setSlip(null);
-                }}
-                className={`font-bold text-[13px] px-[18px] py-[9px] rounded-lg cursor-pointer border ${
-                  cat.id === activeCategory.id
-                    ? "bg-btn border-btn-border text-fg"
-                    : "bg-panel border-line text-muted font-semibold"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="bg-panel border border-line rounded-[14px] overflow-hidden">
-            <div className="px-5 pt-5 pb-1 font-heading font-bold text-lg text-fg">{activeCategory.question}</div>
-            {activeCategory.outcomes.map((row) => (
-              <div
-                key={row.label}
-                className="grid grid-cols-[1.3fr_1.1fr_96px_96px] items-center gap-3.5 px-5 py-4 border-t border-line"
-              >
-                <div className="font-semibold text-[15px] text-fg">{row.label}</div>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-[#16283b] rounded-[3px] overflow-hidden">
-                    <div className="h-full bg-accent rounded-[3px]" style={{ width: `${row.pct}%` }} />
+      <div className="grid grid-cols-[1fr_380px] gap-[22px] items-start">
+        {/* MARKETS */}
+        <div className="flex flex-col gap-3.5">
+          {event.categories.map((cat, i) => (
+            <Reveal key={cat.id} delay={i * 80}>
+              <div className="bg-panel border border-line rounded-[14px] p-5 transition-all duration-[250ms] hover:-translate-y-1 hover:border-btn-border">
+                <div className="flex items-center justify-between mb-3.5">
+                  <div>
+                    <div className="font-bold text-xs text-accent uppercase tracking-[0.5px] mb-1">{cat.label}</div>
+                    <div className="font-bold text-[15px] text-fg">{cat.question}</div>
                   </div>
-                  <span className="font-heading font-bold text-xs text-muted min-w-8">{row.pct}%</span>
+                  <div className="font-semibold text-xs text-dim">{cat.vol} Vol</div>
                 </div>
-                <button
-                  onClick={() => openSlip(row, "YES")}
-                  className="bg-btn border border-btn-border text-accent-soft font-heading font-bold text-[13px] px-1 py-2.5 rounded-lg cursor-pointer"
-                >
-                  YES {row.yesOdds.toFixed(2)}x
-                </button>
-                <button
-                  onClick={() => openSlip(row, "NO")}
-                  className="bg-[#161f2c] border border-line-2 text-no font-heading font-bold text-[13px] px-1 py-2.5 rounded-lg cursor-pointer"
-                >
-                  NO {row.noOdds.toFixed(2)}x
-                </button>
+                <div className="flex flex-col gap-2.5">
+                  {cat.outcomes.map((row, j) => (
+                    <div key={row.label} className="flex items-center gap-3.5">
+                      <div className="w-[110px] font-semibold text-[13px] text-soft-fg">{row.label}</div>
+                      <FillBar pct={row.pct} barClass={j === 0 ? "bg-accent" : "bg-faint"} />
+                      <span className="font-heading font-bold text-xs text-muted w-9 text-right">{row.pct}%</span>
+                      <button
+                        onClick={() => pick(cat.label, row, "YES")}
+                        className="bg-btn border border-btn-border text-accent-soft font-heading font-bold text-xs px-3 py-[7px] rounded-md cursor-pointer transition-all hover:bg-[#24498a] hover:shadow-[0_0_16px_rgba(77,159,255,0.3)]"
+                      >
+                        YES {row.yesOdds.toFixed(2)}x
+                      </button>
+                      <button
+                        onClick={() => pick(cat.label, row, "NO")}
+                        className="bg-[#161f2c] border border-line-2 text-no font-heading font-bold text-xs px-3 py-[7px] rounded-md cursor-pointer transition-all hover:bg-[#1f2a3a] hover:shadow-[0_0_16px_rgba(217,139,139,0.25)]"
+                      >
+                        NO {row.noOdds.toFixed(2)}x
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
+            </Reveal>
+          ))}
 
-          {slip && (
-            <div className="mt-5 p-6 bg-panel-2 border border-btn-border rounded-[14px]">
-              <div className="flex justify-between items-center mb-[18px]">
-                <div>
-                  <div className="font-semibold text-xs text-muted">Placing order</div>
-                  <div className="font-heading font-bold text-lg text-fg">
-                    {slip.side} · {slip.label}
-                  </div>
-                </div>
-                <button
-                  onClick={() => setSlip(null)}
-                  className="bg-transparent border-none text-dim text-[22px] cursor-pointer leading-none"
-                >
-                  ×
-                </button>
+          <Reveal delay={200}>
+            <div className="flex items-center gap-2.5 px-5 py-4 bg-panel border border-line rounded-xl">
+              <span className="text-base">🛡️</span>
+              <div className="flex-1 font-semibold text-[13px] text-muted">
+                Match data verified via TxLINE SSE stream, anchored on Solana.
               </div>
-              <div className="flex gap-[18px] items-end flex-wrap">
-                <div className="flex-1 min-w-[150px]">
-                  <label className="block font-semibold text-xs text-muted mb-1.5">Stake (USDC)</label>
-                  <input
-                    type="number"
-                    value={stake}
-                    onChange={(e) => setStake(Number(e.target.value) || 0)}
-                    className="w-full box-border px-3.5 py-3 rounded-lg border border-line-2 bg-abyss text-fg font-heading font-bold text-base"
-                  />
+              <Link
+                href="/proofs"
+                className="bg-transparent border border-line-2 !text-accent-soft font-bold text-xs px-3.5 py-2 rounded-lg cursor-pointer no-underline"
+              >
+                View Proof
+              </Link>
+            </div>
+          </Reveal>
+        </div>
+
+        {/* TRADE SLIP + SIDE PANELS */}
+        <div className="sticky top-[86px] flex flex-col gap-3.5">
+          <Reveal delay={100}>
+            <div className="bg-panel border border-btn-border rounded-2xl p-[22px] shadow-[0_16px_44px_rgba(47,111,237,0.14)]">
+              <div className="font-heading font-bold text-base text-fg mb-3.5">Place a Trade</div>
+              <div className="bg-[#0a1a29] border border-line rounded-[10px] p-3.5 mb-3.5">
+                <div className="font-semibold text-[11px] text-dim uppercase mb-1.5">Selection</div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-bold text-sm text-fg">{slip.outcome}</div>
+                    <div className="font-medium text-xs text-dim">{slip.category}</div>
+                  </div>
+                  <span
+                    className={`font-heading font-bold text-xs px-2.5 py-[5px] rounded-md ${
+                      slip.side === "YES" ? "bg-btn text-accent-soft" : "bg-[#161f2c] text-no"
+                    }`}
+                  >
+                    {slip.side} {slip.odds.toFixed(2)}x
+                  </span>
                 </div>
-                <div>
-                  <div className="font-semibold text-xs text-muted mb-1.5">Odds</div>
-                  <div className="font-heading font-bold text-lg text-fg">{slip.odds.toFixed(2)}x</div>
-                </div>
-                <div>
-                  <div className="font-semibold text-xs text-muted mb-1.5">Potential payout</div>
-                  <div className="font-heading font-bold text-lg text-win">${(stake * slip.odds).toFixed(2)}</div>
-                </div>
+              </div>
+              <div className="font-semibold text-[11px] text-dim uppercase mb-1.5">Stake (USDC)</div>
+              <input
+                type="number"
+                min={1}
+                value={stake}
+                onChange={(e) => setStake(Number(e.target.value) || 0)}
+                className="w-full box-border px-3.5 py-[13px] rounded-[10px] border border-line bg-[#0a1624] text-fg font-heading font-bold text-lg mb-2.5"
+              />
+              <div className="flex gap-2 mb-4">
+                {QUICK_STAKES.map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => setStake(q)}
+                    className="flex-1 bg-[#0a1a29] border border-line text-muted font-bold text-xs py-2 rounded-lg cursor-pointer transition-colors hover:border-btn-border hover:text-fg"
+                  >
+                    ${q}
+                  </button>
+                ))}
+              </div>
+              <div className="flex justify-between items-center bg-panel-2 border border-btn-border rounded-[10px] px-4 py-3.5 mb-4">
+                <span className="font-semibold text-[13px] text-muted">Potential payout</span>
+                <span className="font-heading font-bold text-lg text-win">${(stake * slip.odds).toFixed(2)}</span>
+              </div>
+              <Magnetic className="w-full">
                 <button
                   onClick={placeOrder}
-                  className="bg-accent border-none text-white font-heading font-bold text-sm px-[26px] py-3.5 rounded-[10px] cursor-pointer"
+                  className="w-full bg-[linear-gradient(135deg,#2f6fed,#4d9fff)] border-none text-white font-heading font-bold text-sm tracking-[1px] py-[15px] rounded-xl cursor-pointer shadow-[0_8px_24px_rgba(47,111,237,0.35)] hover:shadow-[0_10px_32px_rgba(47,111,237,0.55)] transition-shadow"
                 >
-                  Place Order
+                  PLACE TRADE
                 </button>
-              </div>
+              </Magnetic>
+              {placed && (
+                <div className="rise-in mt-3 text-center font-bold text-[13px] text-win">
+                  ✓ Trade placed — settling on-chain
+                </div>
+              )}
             </div>
-          )}
+          </Reveal>
 
-          <div className="flex items-center gap-2.5 mt-5 px-5 py-4 bg-panel border border-line rounded-xl">
-            <span className="text-base">🛡️</span>
-            <div className="flex-1 font-semibold text-[13px] text-muted">
-              Match data verified via TxLINE SSE stream, anchored on Solana.
-            </div>
-            <Link
-              href="/proofs"
-              className="bg-transparent border border-line-2 !text-accent-soft font-bold text-xs px-3.5 py-2 rounded-lg cursor-pointer no-underline"
-            >
-              View Proof
-            </Link>
-          </div>
-
-          <div className="mt-5 bg-panel border border-line rounded-[14px] p-5 flex-1 box-border">
-            <div className="font-bold text-xs text-dim tracking-[0.5px] uppercase mb-3.5">Recent Trades</div>
-            <div className="flex flex-col gap-3">
-              {RECENT_TRADES.map((tr, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
+          <Reveal delay={180}>
+            <div className="bg-panel border border-line rounded-[14px] p-[18px]">
+              <div className="font-heading font-bold text-[13px] text-fg mb-3">Recent Activity</div>
+              <div className="flex flex-col gap-2.5">
+                {RECENT_TRADES.slice(0, 4).map((tr, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs">
                     <span
-                      className={`font-heading font-bold text-[11px] px-2 py-[3px] rounded-[5px] ${
+                      className={`font-heading font-bold text-[10px] px-1.5 py-0.5 rounded ${
                         tr.side === "YES" ? "bg-btn text-accent-soft" : "bg-[#161f2c] text-no"
                       }`}
                     >
                       {tr.side}
                     </span>
-                    <span className="font-semibold text-[13px] text-fg">{tr.label}</span>
+                    <span className="flex-1 font-semibold text-muted">{tr.label}</span>
+                    <span className="font-semibold text-fg">{tr.amount}</span>
+                    <span className="font-medium text-dim">{tr.time}</span>
                   </div>
-                  <div className="flex items-center gap-3.5">
-                    <span className="font-semibold text-[13px] text-muted">{tr.amount}</span>
-                    <span className="font-medium text-xs text-dim">{tr.time}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN */}
-        <div className="flex flex-col gap-[18px]">
-          <div className="bg-panel border border-line rounded-[14px] p-5">
-            <div className="font-bold text-xs text-dim tracking-[0.5px] uppercase mb-3">Match Status</div>
-            {isLive && event.score ? (
-              <div className="flex items-center justify-between">
-                <div className="text-center">
-                  <div className="mb-1">
-                    <TeamBadge code={event.codeA} color={event.colorA} size="sm" />
-                  </div>
-                  <div className="font-semibold text-xs text-muted">{event.teamA}</div>
-                </div>
-                <div className="font-heading font-bold text-[26px] text-fg">
-                  {event.score.a} - {event.score.b}
-                </div>
-                <div className="text-center">
-                  <div className="mb-1">
-                    <TeamBadge code={event.codeB} color={event.colorB} size="sm" />
-                  </div>
-                  <div className="font-semibold text-xs text-muted">{event.teamB}</div>
-                </div>
+                ))}
               </div>
-            ) : (
-              <div className="font-semibold text-sm text-fg">Kickoff: {event.dateLabel}</div>
-            )}
-          </div>
-
-          <div className="bg-panel border border-line rounded-[14px] p-5">
-            <div className="font-bold text-xs text-dim tracking-[0.5px] uppercase mb-3.5">Top Traders (World Cup)</div>
-            <div className="flex flex-col gap-3">
-              {TOP_TRADERS.map((t) => (
-                <div key={t.rank} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5 font-semibold text-[13px] text-fg">
-                    <span className="text-dim">{t.rank}</span>
-                    {t.name}
-                  </div>
-                  <div className="text-right">
-                    <div className="font-heading font-bold text-[13px] text-fg">{t.volume}</div>
-                    <div className="font-semibold text-[11px] text-win">{t.change}</div>
-                  </div>
-                </div>
-              ))}
             </div>
-          </div>
+          </Reveal>
 
-          <div className="bg-panel border border-line rounded-[14px] p-5">
-            <div className="font-bold text-xs text-dim tracking-[0.5px] uppercase mb-3.5">Recent Settlements</div>
-            <div className="flex flex-col gap-3">
-              {SETTLEMENTS.map((s) => (
-                <div key={s.event}>
-                  <div className="font-semibold text-[13px] text-fg">{s.event}</div>
-                  <div className="flex justify-between">
-                    <span className="font-medium text-xs text-muted">{s.outcome}</span>
-                    <span className="font-medium text-xs text-dim">{s.time}</span>
+          <Reveal delay={240}>
+            <div className="bg-panel border border-line rounded-[14px] p-[18px]">
+              <div className="font-heading font-bold text-[13px] text-fg mb-3">Top Traders (World Cup)</div>
+              <div className="flex flex-col gap-2.5">
+                {TOP_TRADERS.map((t) => (
+                  <div key={t.rank} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5 font-semibold text-[13px] text-fg">
+                      <span className="text-dim">{t.rank}</span>
+                      {t.name}
+                    </div>
+                    <div className="text-right">
+                      <div className="font-heading font-bold text-[13px] text-fg">{t.volume}</div>
+                      <div className="font-semibold text-[11px] text-win">{t.change}</div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          </Reveal>
 
-          <div className="bg-[#0f2c22] border border-[#1e4a37] rounded-[14px] p-5">
-            <div className="font-bold text-xs text-dim tracking-[0.5px] uppercase mb-2.5">TxLINE Integration Status</div>
-            <div className="flex items-center gap-2">
-              <LiveDot size={8} />
-              <span className="font-heading font-bold text-sm text-win">Live Data Stream: Active</span>
+          <Reveal delay={300}>
+            <div className="bg-panel border border-line rounded-[14px] p-[18px]">
+              <div className="font-heading font-bold text-[13px] text-fg mb-3">Recent Settlements</div>
+              <div className="flex flex-col gap-2.5">
+                {SETTLEMENTS.map((s) => (
+                  <div key={s.event}>
+                    <div className="font-semibold text-[13px] text-fg">{s.event}</div>
+                    <div className="flex justify-between">
+                      <span className="font-medium text-xs text-muted">{s.outcome}</span>
+                      <span className="font-medium text-xs text-dim">{s.time}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </div>
     </div>
