@@ -7,7 +7,7 @@ import type { MatchEvent } from "@bluefin/types";
 import TeamBadge from "@/components/team-badge";
 import LiveDot from "@/components/live-dot";
 import PageBackdrop from "@/components/page-backdrop";
-import { FillBar, PageTitle, Reveal } from "@/components/fx";
+import { FillBar, HoverCard, PageTitle, Reveal } from "@/components/fx";
 import { EVENTS } from "@/lib/data";
 
 const FILTERS = [
@@ -69,14 +69,12 @@ export default function MarketsPage() {
       <div className="grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-5">
         {cards.map(({ ev, cat, top }, i) => (
           <Reveal key={`${ev.id}-${cat.id}`} delay={(i % 6) * 70}>
-            <Link
-              href={`/trade/${ev.id}?category=${cat.id}`}
-              className="bg-panel border border-line rounded-[14px] p-[22px] cursor-pointer flex flex-col gap-4 no-underline transition-all duration-[250ms] hover:-translate-y-[5px] hover:border-btn-border hover:shadow-[0_14px_34px_rgba(47,111,237,0.18)]"
-            >
-              <div className="flex items-center gap-2 font-bold text-[15px] text-fg">
+            <HoverCard className="bg-panel border border-line rounded-[14px] p-[22px] transition-all duration-[250ms] hover:-translate-y-[5px] hover:border-btn-border hover:shadow-[0_14px_34px_rgba(47,111,237,0.18)]">
+              <Link href={`/trade/${ev.id}?category=${cat.id}`} className="absolute inset-0 z-[2] rounded-[14px]" aria-label={cat.question} />
+              <div className="flex items-center gap-2 font-bold text-[15px] text-fg group-hover:text-white transition-colors duration-300">
                 <TeamBadge code={ev.codeA} color={ev.colorA} size="sm" />
                 <span>{ev.teamA}</span>
-                <span className="text-dim">vs</span>
+                <span className="text-dim group-hover:text-muted transition-colors duration-300">vs</span>
                 <span>{ev.teamB}</span>
                 <TeamBadge code={ev.codeB} color={ev.colorB} size="sm" />
               </div>
@@ -86,27 +84,34 @@ export default function MarketsPage() {
                   <span className="font-heading font-bold text-[11px] text-live tracking-[1px]">LIVE</span>
                 </div>
               ) : (
-                <div className="font-semibold text-xs text-dim">{ev.dateLabel}</div>
+                <div className="font-semibold text-xs text-dim group-hover:text-muted transition-colors duration-300">{ev.dateLabel}</div>
               )}
               <div>
-                <div className="font-bold text-xs text-accent uppercase tracking-[0.5px] mb-1.5">{cat.label}</div>
-                <div className="font-semibold text-[15px] text-fg">{cat.question}</div>
+                <div className="font-bold text-xs text-accent uppercase tracking-[0.5px] mb-1.5 group-hover:text-accent-soft transition-colors duration-300">{cat.label}</div>
+                <div className="relative overflow-hidden font-semibold text-[15px] text-fg h-[1.4em]">
+                  <span className="block transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-full">
+                    {cat.question}
+                  </span>
+                  <span className="block absolute inset-0 translate-y-full transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 text-accent-soft" aria-hidden>
+                    {cat.question}
+                  </span>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <FillBar pct={top.pct} />
-                <span className="font-heading font-bold text-xs text-muted min-w-8 text-right">{top.pct}%</span>
+                <span className="font-heading font-bold text-xs text-muted min-w-8 text-right group-hover:text-accent-soft transition-colors duration-300">{top.pct}%</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <div className="flex-1 font-semibold text-[13px] text-muted">{top.label}</div>
-                <div className="bg-btn border border-btn-border text-accent-soft font-heading font-bold text-xs px-2.5 py-1.5 rounded-md transition-shadow hover:shadow-[0_0_16px_rgba(77,159,255,0.35)]">
+                <div className="flex-1 font-semibold text-[13px] text-muted group-hover:text-soft-fg transition-colors duration-300">{top.label}</div>
+                <div className="bg-btn border border-btn-border text-accent-soft font-heading font-bold text-xs px-2.5 py-1.5 rounded-md">
                   YES {top.yesOdds.toFixed(2)}x
                 </div>
                 <div className="bg-[#161f2c] border border-line-2 text-no font-heading font-bold text-xs px-2.5 py-1.5 rounded-md">
                   NO {top.noOdds.toFixed(2)}x
                 </div>
               </div>
-              <div className="border-t border-line pt-3 font-semibold text-xs text-dim">{cat.vol} Vol</div>
-            </Link>
+              <div className="border-t border-line pt-3 font-semibold text-xs text-dim group-hover:text-muted transition-colors duration-300">{cat.vol} Vol</div>
+            </HoverCard>
           </Reveal>
         ))}
       </div>
