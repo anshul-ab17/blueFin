@@ -87,8 +87,18 @@ async fn settle_one(state: &AppState, market_id: &str) -> anyhow::Result<()> {
         .as_str()
         .ok_or_else(|| anyhow::anyhow!("proof missing merkleRoot"))?
         .to_string();
-    if merkle_root.len() != 64 {
+
+    // Validate before passing to subprocess args: exactly 64 lowercase hex chars.
+    if merkle_root.len() != 64 || !merkle_root.bytes().all(|b| b.is_ascii_hexdigit()) {
         anyhow::bail!("merkle root not 64 hex chars: {merkle_root}");
+    }
+    // market_id originates from our own market_slug() (e.g. "esp-arg") but re-validate
+    // it before passing as a subprocess arg in case DB was tampered.
+    if market_id.is_empty()
+        || market_id.len() > 32
+        || !market_id.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
+    {
+        anyhow::bail!("invalid market_id for subprocess: {market_id}");
     }
 
     let side = winning_side_for_result(score_a, score_b);

@@ -99,12 +99,21 @@ pub struct TradeReq {
     pub tx_sig: Option<String>,
 }
 
+/// Validate wallet is a plausible base58-encoded Solana pubkey (32 bytes → 43-44 chars).
+/// Does NOT prove the caller controls the key — on-chain tx_sig verification is the
+/// proper fix; this guards against garbage / injection in the wallet column.
+fn validate_wallet(w: &str) -> bool {
+    const BASE58: &[u8] = b"123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    let w = w.trim();
+    (32..=44).contains(&w.len()) && w.bytes().all(|b| BASE58.contains(&b))
+}
+
 pub async fn post_trade(
     State(state): State<AppState>,
     Json(req): Json<TradeReq>,
 ) -> Result<Json<Value>, (StatusCode, Json<Value>)> {
-    if req.wallet.trim().is_empty() {
-        return Err(bad("wallet required"));
+    if !validate_wallet(&req.wallet) {
+        return Err(bad("wallet must be a valid Solana base58 pubkey (32–44 chars)"));
     }
     let quote = QUOTES
         .lock()
