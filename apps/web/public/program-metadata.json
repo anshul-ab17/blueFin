@@ -1,0 +1,10 @@
+{
+  "name": "Bluefin",
+  "symbol": "BFIN",
+  "description": "Decentralized prediction market for World Cup 2026. Trade YES/NO shares on match outcomes — settled automatically on-chain the instant a TxODDS-verified result lands.",
+  "image": "https://blue-fin.vercel.app/assets/logos/bluefin_dark.png",
+  "website": "https://blue-fin.vercel.app",
+  "twitter": "",
+  "programId": "BbeCFPpsNTi5sqBNWjeXPtAitzqnDhYEMVxkLQodNH3B",
+  "network": "devnet"
+}
