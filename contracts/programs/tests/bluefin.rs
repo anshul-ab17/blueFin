@@ -38,7 +38,7 @@ fn send(svm: &mut LiteSVM, ixs: &[Instruction], payer: &Keypair, signers: &[&Key
 /// init_market + seed escrow with house liquidity.
 fn setup() -> Env {
     let mut svm = LiteSVM::new();
-    svm.add_program_from_file(bluefin::ID, "../../target/deploy/bluefin.so")
+    svm.add_program_from_file(bluefin::ID, "../target/deploy/bluefin.so")
         .expect("run `anchor build` first");
 
     let authority = Keypair::new();
