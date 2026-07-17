@@ -99,6 +99,27 @@ async fn upsert_outcome(
     .bind(market_id).bind(category).bind(label)
     .execute(pool)
     .await?;
+
+    // Record snapshot — only when pct changed meaningfully (≥0.1pp) to avoid flooding
+    let last_pct: Option<f64> = sqlx::query_scalar(
+        "SELECT pct FROM odds_history WHERE market_id = ? AND category = ? AND label = ? ORDER BY ts DESC LIMIT 1",
+    )
+    .bind(market_id).bind(category).bind(label)
+    .fetch_optional(pool)
+    .await?;
+    let should_record = last_pct.map_or(true, |prev| (pct - prev).abs() >= 0.1);
+    if should_record {
+        let ts = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs() as i64;
+        sqlx::query(
+            "INSERT INTO odds_history (market_id, category, label, pct, ts) VALUES (?, ?, ?, ?, ?)",
+        )
+        .bind(market_id).bind(category).bind(label).bind(pct).bind(ts)
+        .execute(pool)
+        .await?;
+    }
     Ok(())
 }
 

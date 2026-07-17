@@ -7,6 +7,7 @@ import TeamBadge from "@/components/team-badge";
 import LiveDot from "@/components/live-dot";
 import PageBackdrop from "@/components/page-backdrop";
 import { FillBar, HoverCard, Magnetic, Reveal } from "@/components/fx";
+import OddsChart from "@/components/odds-chart";
 import { RECENT_TRADES, SETTLEMENTS, TOP_TRADERS } from "@/lib/data";
 import { useAppStore } from "@/lib/store";
 
@@ -113,6 +114,15 @@ export default function TradeView({
       <div className="grid grid-cols-[1fr_380px] gap-[22px] items-start">
         {/* MARKETS */}
         <div className="flex flex-col gap-3.5">
+          <OddsChart
+            marketId={event.id}
+            category={
+              (event.categories.find((c) => c.label === slip.category) ?? event.categories[0]).id
+            }
+            labels={
+              (event.categories.find((c) => c.label === slip.category) ?? event.categories[0]).outcomes.map((o) => o.label)
+            }
+          />
           {event.categories.map((cat, i) => (
             <Reveal key={cat.id} delay={i * 80}>
               <HoverCard className="bg-panel border border-line rounded-[14px] p-5 transition-all duration-[250ms] hover:-translate-y-1 hover:border-btn-border">

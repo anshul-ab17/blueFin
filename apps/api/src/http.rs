@@ -15,6 +15,7 @@ pub fn router(state: AppState) -> Router {
         .route("/health", get(health))
         .route("/api/markets", get(list_markets))
         .route("/api/markets/{id}", get(get_market))
+        .route("/api/markets/{id}/history", get(market_history))
         .route("/api/leaderboard", get(leaderboard))
         .route("/api/proofs", get(proofs))
         .route("/api/settlements", get(settlements))
@@ -187,6 +188,70 @@ async fn get_market(
     };
     let outcomes = db::outcomes_for(&state.db, &m.id).await.map_err(|_| internal_resp())?;
     Ok(Json(event_json(&state, &m, outcomes).await))
+}
+
+/// GET /api/markets/{id}/history?category=result&window=1d
+/// Returns probability history for charting. window: 1d|1w|1m|all (default all)
+async fn market_history(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+    axum::extract::Query(params): axum::extract::Query<std::collections::HashMap<String, String>>,
+) -> Result<Json<Value>, StatusCode> {
+    let category = params.get("category").cloned().unwrap_or_else(|| "result".into());
+    let window_secs: i64 = match params.get("window").map(|s| s.as_str()) {
+        Some("1d") => 86_400,
+        Some("1w") => 7 * 86_400,
+        Some("1m") => 30 * 86_400,
+        _ => i64::MAX,
+    };
+    let since = if window_secs == i64::MAX {
+        0i64
+    } else {
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs() as i64
+            - window_secs
+    };
+
+    let rows: Vec<(String, f64, i64)> = sqlx::query_as(
+        "SELECT label, pct, ts FROM odds_history
+         WHERE market_id = ? AND category = ? AND ts >= ?
+         ORDER BY ts ASC",
+    )
+    .bind(&id).bind(&category).bind(since)
+    .fetch_all(&state.db)
+    .await
+    .map_err(internal)?;
+
+    // group by label preserving insertion order
+    let mut labels: Vec<String> = Vec::new();
+    for (label, _, _) in &rows {
+        if !labels.contains(label) { labels.push(label.clone()); }
+    }
+
+    // build series: [{ts, values:[pct per label]}]
+    // collect all unique timestamps
+    let mut ts_set: Vec<i64> = rows.iter().map(|(_, _, ts)| *ts).collect();
+    ts_set.dedup();
+
+    let series: Vec<Value> = ts_set.into_iter().map(|ts| {
+        let values: Vec<Value> = labels.iter().map(|l| {
+            rows.iter()
+                .filter(|(rl, _, rts)| rl == l && *rts <= ts)
+                .last()
+                .map(|(_, pct, _)| json!(pct))
+                .unwrap_or(Value::Null)
+        }).collect();
+        json!({ "ts": ts, "values": values })
+    }).collect();
+
+    Ok(Json(json!({
+        "marketId": id,
+        "category": category,
+        "labels": labels,
+        "series": series,
+    })))
 }
 
 async fn leaderboard(State(state): State<AppState>) -> Result<Json<Value>, StatusCode> {
