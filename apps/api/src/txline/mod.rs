@@ -1,3 +1,4 @@
+pub mod ingest;
 pub mod types;
 
 use reqwest::header::{HeaderMap, HeaderValue};

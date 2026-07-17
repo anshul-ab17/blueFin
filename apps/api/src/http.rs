@@ -1,9 +1,11 @@
 use axum::extract::{Path, State};
 use axum::http::StatusCode;
+use axum::response::sse::{Event, Sse};
 use axum::response::IntoResponse;
-use axum::routing::get;
+use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde_json::{json, Value};
+use std::convert::Infallible;
 
 use crate::db::{self, MarketRow, OutcomeRow};
 use crate::state::AppState;
@@ -16,6 +18,10 @@ pub fn router(state: AppState) -> Router {
         .route("/api/leaderboard", get(leaderboard))
         .route("/api/proofs", get(proofs))
         .route("/api/settlements", get(settlements))
+        .route("/api/quotes", post(crate::trades::post_quote))
+        .route("/api/trades", post(crate::trades::post_trade))
+        .route("/api/positions/{wallet}", get(crate::trades::positions))
+        .route("/api/stream", get(stream))
         .layer(tower_http::cors::CorsLayer::permissive())
         .with_state(state)
 }
@@ -259,6 +265,22 @@ async fn settlements(State(state): State<AppState>) -> Result<Json<Value>, Statu
         }));
     }
     Ok(Json(Value::Array(out)))
+}
+
+async fn stream(State(state): State<AppState>) -> Sse<impl futures_util::Stream<Item = Result<Event, Infallible>>> {
+    let rx = state.events.subscribe();
+    let s = futures_util::stream::unfold(rx, |mut rx| async move {
+        loop {
+            match rx.recv().await {
+                Ok(msg) => {
+                    return Some((Ok(Event::default().data(msg.to_string())), rx));
+                }
+                Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => continue,
+                Err(_) => return None,
+            }
+        }
+    });
+    Sse::new(s).keep_alive(axum::response::sse::KeepAlive::new())
 }
 
 fn internal<E: std::fmt::Debug>(e: E) -> StatusCode {
