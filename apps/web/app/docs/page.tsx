@@ -42,7 +42,7 @@ function SectionHeading({ kicker, title }: { kicker: string; title: string }) {
   return (
     <Reveal>
       <div className="font-bold text-xs tracking-[2px] text-accent uppercase mb-2.5">{kicker}</div>
-      <h2 className="font-heading font-bold text-[34px] m-0 mb-5 text-fg">{title}</h2>
+      <h2 className="font-heading font-bold text-[26px] md:text-[34px] m-0 mb-5 text-fg">{title}</h2>
     </Reveal>
   );
 }
@@ -51,12 +51,12 @@ export default function DocsPage() {
   return (
     <div>
       <PageBackdrop src="/assets/bg/deep-water.png" opacity={1} />
-      <div className="max-w-[860px] mx-auto px-10">
+      <div className="max-w-[860px] mx-auto px-5 md:px-10">
         {/* Intro */}
         <div className="pt-20 pb-14 border-b border-line">
           <Reveal>
             <div className="font-bold text-xs tracking-[2px] text-accent uppercase mb-3">Documentation</div>
-            <h1 className="font-heading font-bold text-[48px] leading-[1.1] m-0 mb-5 text-fg">
+            <h1 className="font-heading font-bold text-[34px] md:text-[48px] leading-[1.1] m-0 mb-5 text-fg">
               How Bluefin works, <span className="text-accent">end to end.</span>
             </h1>
           </Reveal>
@@ -99,7 +99,7 @@ export default function DocsPage() {
               Settlement track.
             </p>
           </Reveal>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {TXLINE_POINTS.map((p, i) => (
               <Reveal key={p.title} delay={100 + i * 70}>
                 <div className="bg-panel border border-line rounded-2xl p-6 h-full box-border">
@@ -119,7 +119,7 @@ export default function DocsPage() {
               {STACK.map((r, i) => (
                 <div
                   key={r.layer}
-                  className={`grid grid-cols-[110px_1fr_1.2fr] gap-4 px-6 py-4 items-baseline ${i > 0 ? "border-t border-line" : ""}`}
+                  className={`grid grid-cols-1 sm:grid-cols-[110px_1fr_1.2fr] gap-1.5 sm:gap-4 px-6 py-4 items-baseline ${i > 0 ? "border-t border-line" : ""}`}
                 >
                   <div className="font-heading font-bold text-[13px] tracking-[1px] uppercase text-accent">{r.layer}</div>
                   <div className="font-semibold text-[13px] text-fg">{r.tech}</div>
@@ -137,7 +137,7 @@ export default function DocsPage() {
             <p className="font-medium text-[15px] text-muted m-0 mb-7">
               Browse the markets, or inspect a settlement proof yourself.
             </p>
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-4">
               <Link
                 href="/markets"
                 className="inline-block bg-accent !text-white font-heading font-bold text-sm px-6 py-3 rounded-full no-underline hover:bg-accent-soft transition-colors"

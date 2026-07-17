@@ -60,12 +60,12 @@ function EcosystemSection() {
   }, []);
 
   return (
-    <div id="about-section" className="py-[88px] border-b border-line">
+    <div id="about-section" className="py-14 lg:py-[88px] border-b border-line">
       {/* Header */}
       <div className="text-center mb-14">
         <Reveal>
           <div className="font-bold text-xs tracking-[2px] text-accent uppercase mb-2.5">Prediction Markets &amp; Settlement · by TxODDS</div>
-          <h2 className="font-heading font-bold text-[40px] m-0 mb-4 text-fg">One Whale. An Entire Ocean.</h2>
+          <h2 className="font-heading font-bold text-[30px] md:text-[40px] m-0 mb-4 text-fg">One Whale. An Entire Ocean.</h2>
         </Reveal>
         <Reveal delay={80}>
           <p className="font-medium text-base leading-[1.7] text-muted m-0 max-w-[520px] mx-auto">
@@ -75,7 +75,7 @@ function EcosystemSection() {
       </div>
 
       {/* Constellation grid */}
-      <div className="grid grid-cols-[1fr_1.05fr] gap-12 items-center max-w-[1100px] mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.05fr] gap-10 lg:gap-12 items-center max-w-[1100px] mx-auto">
         {/* Info panel — HoverCard + animated content swap */}
         <Reveal delay={100}>
           <HoverCard
@@ -342,7 +342,7 @@ function HowItWorks() {
   }, []);
 
   const panels = [
-    <div key="discover" className="w-[380px] bg-panel border border-line-2 rounded-2xl p-6 shadow-[0_24px_60px_rgba(4,10,18,0.6)]">
+    <div key="discover" className="w-full max-w-[380px] bg-panel border border-line-2 rounded-2xl p-6 shadow-[0_24px_60px_rgba(4,10,18,0.6)]">
       <div className="flex items-center gap-2 mb-3.5">
         <TeamBadge code="ARG" color="#3f7dbf" size="xs" />
         <span className="font-bold text-sm text-fg">Argentina vs France</span>
@@ -356,7 +356,7 @@ function HowItWorks() {
       </div>
       <div className="font-semibold text-xs text-dim">Argentina leads · $1.25M Vol</div>
     </div>,
-    <div key="trade" className="w-[380px] bg-panel border border-line-2 rounded-2xl p-6 shadow-[0_24px_60px_rgba(4,10,18,0.6)]">
+    <div key="trade" className="w-full max-w-[380px] bg-panel border border-line-2 rounded-2xl p-6 shadow-[0_24px_60px_rgba(4,10,18,0.6)]">
       <div className="font-semibold text-[15px] text-fg mb-4">Argentina to win?</div>
       <div className="flex gap-2.5 mb-[18px]">
         <span className="flex-1 text-center bg-btn border border-btn-border text-accent-soft font-heading font-bold text-[13px] px-1 py-[11px] rounded-lg">
@@ -372,7 +372,7 @@ function HowItWorks() {
         <span className="font-heading font-bold text-[15px] text-win">Payout $37.00</span>
       </div>
     </div>,
-    <div key="resolve" className="w-[380px] bg-panel border border-line-2 rounded-2xl p-6 shadow-[0_24px_60px_rgba(4,10,18,0.6)]">
+    <div key="resolve" className="w-full max-w-[380px] bg-panel border border-line-2 rounded-2xl p-6 shadow-[0_24px_60px_rgba(4,10,18,0.6)]">
       <div className="flex items-center gap-2.5 mb-4">
         <span className="inline-flex items-center justify-center w-[34px] h-[34px] rounded-full bg-[rgba(34,197,94,0.15)] border border-live text-win text-[15px]">
           ✓
@@ -387,7 +387,7 @@ function HowItWorks() {
       <div className="font-semibold text-[11px] text-dim mb-1">RESULT</div>
       <div className="font-bold text-sm text-fg">Argentina 3 — 2 France · Full Time</div>
     </div>,
-    <div key="settle" className="w-[380px] bg-panel border border-live rounded-2xl p-6 shadow-[0_0_50px_rgba(34,197,94,0.12),0_24px_60px_rgba(4,10,18,0.6)]">
+    <div key="settle" className="w-full max-w-[380px] bg-panel border border-live rounded-2xl p-6 shadow-[0_0_50px_rgba(34,197,94,0.12),0_24px_60px_rgba(4,10,18,0.6)]">
       <div className="font-semibold text-xs text-dim uppercase tracking-[0.5px] mb-2.5">Settlement Complete</div>
       <div className="font-heading font-bold text-[34px] text-win mb-2">+$37.00 USDC</div>
       <div className="font-semibold text-[13px] text-muted mb-4">Paid to 7xKq…9dFe · on-chain · 0.4s</div>
@@ -406,15 +406,15 @@ function HowItWorks() {
           style={{ backgroundImage: "url('/assets/bg/deep-water.png')" }}
         />
         <div className="absolute inset-0 bg-[rgba(8,16,26,0.87)]" />
-        <div className="relative max-w-[1280px] mx-auto w-full px-10 box-border">
-          <div className="text-center mb-12">
+        <div className="relative max-w-[1280px] mx-auto w-full px-5 md:px-10 box-border">
+          <div className="text-center mb-8 lg:mb-12">
             <div className="font-bold text-xs tracking-[2px] text-accent uppercase mb-2.5">
               Simple · Transparent · Trustless
             </div>
-            <h2 className="font-heading font-bold text-[40px] m-0 text-fg">How Bluefin Works</h2>
+            <h2 className="font-heading font-bold text-[30px] md:text-[40px] m-0 text-fg">How Bluefin Works</h2>
           </div>
-          <div className="grid grid-cols-[60px_1fr_1fr] gap-12 items-center min-h-[380px]">
-            <div className="flex flex-col items-center h-[340px]">
+          <div className="grid grid-cols-1 lg:grid-cols-[60px_1fr_1fr] gap-6 lg:gap-12 items-center lg:min-h-[380px]">
+            <div className="hidden lg:flex flex-col items-center h-[340px]">
               <div className="relative w-0.5 flex-1 bg-line rounded-sm overflow-hidden">
                 <div
                   className="absolute top-0 left-0 w-full bg-[linear-gradient(180deg,#4d9fff,#7db4ff)]"
@@ -423,10 +423,10 @@ function HowItWorks() {
               </div>
             </div>
             <div key={idx}>
-              <div className="rise-in font-heading font-bold text-[88px] leading-none text-[rgba(77,159,255,0.28)] mb-2.5">
+              <div className="rise-in font-heading font-bold text-[56px] lg:text-[88px] leading-none text-[rgba(77,159,255,0.28)] mb-2.5">
                 {step.num}
               </div>
-              <div className="rise-in font-heading font-bold text-[32px] text-fg mb-3" style={{ animationDelay: "60ms" }}>
+              <div className="rise-in font-heading font-bold text-[26px] lg:text-[32px] text-fg mb-3" style={{ animationDelay: "60ms" }}>
                 {step.title}
               </div>
               <div
@@ -446,7 +446,7 @@ function HowItWorks() {
                 ))}
               </div>
             </div>
-            <div className="relative h-[340px]">
+            <div className="relative h-[240px] sm:h-[340px]">
               {panels.map((panel, i) => (
                 <div
                   key={i}
@@ -486,7 +486,7 @@ export default function Home() {
         />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,20,31,0.35)_0%,rgba(10,20,31,0.55)_55%,#0a141f_100%)]" />
         <div className="relative min-h-[92vh] flex items-end box-border">
-          <div className="max-w-[700px] pb-[84px] pl-16 text-left">
+          <div className="max-w-[700px] pb-[64px] md:pb-[84px] px-6 md:px-0 md:pl-16 text-left">
             <div
               className="rise-in inline-flex items-center gap-2 bg-[rgba(16,31,48,0.7)] border border-line-2 px-3.5 py-[7px] rounded-full mb-[26px] backdrop-blur-[6px]"
               style={{ animationDelay: `${d + 0.5}s` }}
@@ -496,7 +496,7 @@ export default function Home() {
                 LIVE ON WORLD CUP 2026 · POWERED BY TXLINE
               </span>
             </div>
-            <h1 className="font-heading font-bold text-[66px] leading-[1.06] m-0 mb-5 text-white">
+            <h1 className="font-heading font-bold text-[40px] sm:text-[52px] md:text-[66px] leading-[1.06] m-0 mb-5 text-white">
               <span className="line-mask">
                 <span className="line-up" style={{ animationDelay: `${d}s` }}>
                   The Home of
@@ -520,7 +520,7 @@ export default function Home() {
               Bluefin is a decentralized prediction market protocol for sports and real-world events. Backed by
               real-time data. Settled on-chain.
             </p>
-            <div className="rise-in flex items-center gap-4" style={{ animationDelay: `${d + 0.75}s` }}>
+            <div className="rise-in flex flex-wrap items-center gap-4" style={{ animationDelay: `${d + 0.75}s` }}>
               <Magnetic>
                 <Link
                   href="/markets"
@@ -552,9 +552,9 @@ export default function Home() {
       {/* LIVE TRADES TICKER */}
       <Ticker />
 
-      <div className="max-w-[1280px] mx-auto px-10">
+      <div className="max-w-[1280px] mx-auto px-5 md:px-10">
         {/* STATS */}
-        <div className="grid grid-cols-4 gap-4 py-10 border-b border-line">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 py-10 border-b border-line">
           {HERO_STATS.map((s, i) => (
             <Reveal key={s.label} delay={i * 80}>
               <HoverCard className="bg-panel border border-line rounded-xl p-5 text-center hover:border-btn-border hover:-translate-y-[3px] transition-all duration-[250ms]">
@@ -584,7 +584,7 @@ export default function Home() {
               </Link>
             </div>
           </Reveal>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {LIVE_NOW.map((m, i) => (
               <Reveal key={i} delay={i * 100}>
                 <HoverCard className="bg-panel border border-line rounded-[14px] p-5 transition-all duration-[250ms] hover:-translate-y-[5px] hover:border-btn-border hover:shadow-[0_14px_34px_rgba(47,111,237,0.18)]">
@@ -622,10 +622,10 @@ export default function Home() {
         </div>
 
         {/* PRODUCT MARKETING */}
-        <div className="grid grid-cols-[1.1fr_0.9fr] gap-14 items-center py-[88px] border-b border-line">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-14 items-center py-14 lg:py-[88px] border-b border-line">
           <div>
             <Reveal>
-              <h2 className="font-heading font-bold text-[40px] leading-[1.15] m-0 mb-[18px] text-fg">
+              <h2 className="font-heading font-bold text-[30px] md:text-[40px] leading-[1.15] m-0 mb-[18px] text-fg">
                 <span className="block">Built for Traders.</span>
                 <span className="block text-accent">Backed by Truth.</span>
               </h2>
@@ -674,10 +674,10 @@ export default function Home() {
         <EcosystemSection />
 
         {/* APP PREVIEW */}
-        <div className="py-[88px] border-b border-line">
+        <div className="py-14 lg:py-[88px] border-b border-line">
           <div className="text-center max-w-[600px] mx-auto mb-10">
             <Reveal>
-              <h2 className="font-heading font-bold text-[40px] m-0 mb-3.5 text-fg">Inside the App</h2>
+              <h2 className="font-heading font-bold text-[30px] md:text-[40px] m-0 mb-3.5 text-fg">Inside the App</h2>
             </Reveal>
             <Reveal delay={80}>
               <p className="font-medium text-base leading-relaxed text-muted m-0">
@@ -715,12 +715,12 @@ export default function Home() {
       {/* HOW IT WORKS — pinned scroll story */}
       <HowItWorks />
 
-      <div className="max-w-[1280px] mx-auto px-10">
+      <div className="max-w-[1280px] mx-auto px-5 md:px-10">
         {/* WHY BLUEFIN */}
         <Reveal>
           <div className="bg-panel border border-line rounded-2xl p-7 max-w-[820px] mx-auto mt-[72px]">
             <div className="font-heading font-bold text-base text-accent mb-4">Why Bluefin?</div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {["Built for speed and scale", "Non-custodial", "Verifiable data you can trust", "Open and permissionless"].map(
                 (t) => (
                   <div key={t} className="flex items-center gap-2.5 font-semibold text-sm text-soft-fg">
@@ -734,9 +734,9 @@ export default function Home() {
         </Reveal>
 
         {/* FAQ */}
-        <div id="faq-section" className="pt-[88px] pb-24">
+        <div id="faq-section" className="pt-14 lg:pt-[88px] pb-24">
           <Reveal>
-            <h2 className="font-heading font-bold text-[40px] m-0 mb-9 text-fg text-center">
+            <h2 className="font-heading font-bold text-[30px] md:text-[40px] m-0 mb-9 text-fg text-center">
               Frequently Asked Questions
             </h2>
           </Reveal>

@@ -68,12 +68,12 @@ export default function TradeView({
   };
 
   return (
-    <div className="max-w-[1280px] mx-auto px-10 pt-8 pb-20">
+    <div className="max-w-[1280px] mx-auto px-5 md:px-10 pt-8 pb-20">
       <PageBackdrop src="/assets/bg/water5.webp" />
 
       {/* MATCH HEADER */}
       <Reveal>
-        <div className="bg-panel border border-line rounded-2xl px-7 py-[22px] flex items-center justify-between mb-[22px]">
+        <div className="bg-panel border border-line rounded-2xl px-5 md:px-7 py-[22px] flex flex-wrap items-center justify-center md:justify-between gap-4 mb-[22px]">
           <div className="flex items-center gap-4">
             <TeamBadge code={event.codeA} color={event.colorA} size="md" />
             <div className="text-center">
@@ -111,7 +111,7 @@ export default function TradeView({
         </div>
       </Reveal>
 
-      <div className="grid grid-cols-[1fr_380px] gap-[22px] items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-[22px] items-start">
         {/* MARKETS */}
         <div className="flex flex-col gap-3.5">
           <OddsChart
@@ -138,7 +138,7 @@ export default function TradeView({
                 </div>
                 <div className="flex flex-col gap-2.5">
                   {cat.outcomes.map((row, j) => (
-                    <div key={row.label} className="flex items-center gap-3.5">
+                    <div key={row.label} className="flex flex-wrap items-center gap-2 md:gap-3.5">
                       <div className="w-[110px] font-semibold text-[13px] text-soft-fg group-hover:text-fg transition-colors duration-300">{row.label}</div>
                       <FillBar pct={row.pct} barClass={j === 0 ? "bg-accent" : "bg-faint"} />
                       <span className="font-heading font-bold text-xs text-muted w-9 text-right group-hover:text-accent-soft transition-colors duration-300">{row.pct}%</span>
@@ -178,7 +178,7 @@ export default function TradeView({
         </div>
 
         {/* TRADE SLIP + SIDE PANELS */}
-        <div className="sticky top-[86px] flex flex-col gap-3.5">
+        <div className="lg:sticky lg:top-[86px] flex flex-col gap-3.5">
           <Reveal delay={100}>
             <div className="bg-panel border border-btn-border rounded-2xl p-[22px] shadow-[0_16px_44px_rgba(47,111,237,0.14)]">
               <div className="font-heading font-bold text-base text-fg mb-3.5">Place a Trade</div>

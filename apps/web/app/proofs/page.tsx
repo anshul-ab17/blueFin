@@ -10,13 +10,13 @@ export default function ProofsPage() {
   const [expanded, setExpanded] = useState<number | null>(null);
 
   return (
-    <div className="max-w-[1000px] mx-auto px-10 pt-12 pb-20">
+    <div className="max-w-[1000px] mx-auto px-5 md:px-10 pt-12 pb-20">
       <PageBackdrop src="/assets/bg/water3.webp" />
       <PageTitle
         title="Stats & Proofs"
         subtitle="Every settlement carries a cryptographic Merkle proof from TxLINE, anchored on Solana. No oracle trust required."
       />
-      <div className="grid grid-cols-3 gap-4 mb-7">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-7">
         <Reveal>
           <StatBox label="Proofs Anchored" value={<CountUp value={1284} />} />
         </Reveal>
@@ -33,7 +33,7 @@ export default function ProofsPage() {
             <div className="bg-panel border border-line rounded-[14px] overflow-hidden transition-all duration-[250ms] hover:-translate-y-[3px] hover:border-btn-border">
               <button
                 onClick={() => setExpanded(expanded === p.id ? null : p.id)}
-                className="w-full flex items-center justify-between px-5 py-4 cursor-pointer bg-transparent border-none text-left"
+                className="w-full flex flex-wrap items-center justify-between gap-3 px-5 py-4 cursor-pointer bg-transparent border-none text-left"
               >
                 <div>
                   <div className="font-heading font-bold text-[15px] text-fg">{p.event}</div>

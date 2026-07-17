@@ -15,7 +15,7 @@ export default function BetsPage() {
   const totalPayout = bets.reduce((a, b) => a + b.payout, 0);
 
   return (
-    <div className="max-w-[1000px] mx-auto px-10 pt-12 pb-20">
+    <div className="max-w-[1000px] mx-auto px-5 md:px-10 pt-12 pb-20">
       <PageBackdrop src="/assets/bg/water4.webp" />
       <PageTitle
         title="My Bets"
@@ -29,7 +29,7 @@ export default function BetsPage() {
         />
       ) : (
         <>
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <Reveal>
               <StatBox label="Open Positions" value={<CountUp value={bets.length} />} />
             </Reveal>
@@ -45,7 +45,8 @@ export default function BetsPage() {
             </Reveal>
           </div>
           <Reveal delay={220}>
-            <div className="bg-panel border border-line rounded-[14px] overflow-hidden">
+            <div className="bg-panel border border-line rounded-[14px] overflow-x-auto">
+              <div className="min-w-[640px]">
               <div className="grid grid-cols-[1.6fr_1fr_0.8fr_0.8fr_0.9fr_0.9fr] px-5 py-3.5 font-bold text-[11px] text-dim uppercase tracking-[0.5px] border-b border-line">
                 <div>Market</div>
                 <div>Outcome</div>
@@ -78,6 +79,7 @@ export default function BetsPage() {
                   <div className="font-bold text-[13px] text-win">${bet.payout.toFixed(2)}</div>
                 </div>
               ))}
+              </div>
             </div>
           </Reveal>
           <Reveal delay={300}>

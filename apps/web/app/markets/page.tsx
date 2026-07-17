@@ -45,7 +45,7 @@ export default function MarketsPage() {
     );
 
   return (
-    <div className="max-w-[1280px] mx-auto px-10 pt-12 pb-20">
+    <div className="max-w-[1280px] mx-auto px-5 md:px-10 pt-12 pb-20">
       <PageBackdrop src="/assets/bg/water2.webp" />
       <PageTitle
         eyebrow="World Cup 2026"
@@ -66,7 +66,7 @@ export default function MarketsPage() {
           </button>
         ))}
       </div>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-5">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(340px,100%),1fr))] gap-5">
         {cards.map(({ ev, cat, top }, i) => (
           <Reveal key={`${ev.id}-${cat.id}`} delay={(i % 6) * 70}>
             <HoverCard className="bg-panel border border-line rounded-[14px] p-[22px] transition-all duration-[250ms] hover:-translate-y-[5px] hover:border-btn-border hover:shadow-[0_14px_34px_rgba(47,111,237,0.18)]">

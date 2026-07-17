@@ -74,8 +74,8 @@ export default function AuthModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-[300] bg-[rgba(4,9,15,0.75)] flex items-center justify-center">
-      <div className="w-[360px] bg-[#0a0f16] border border-[#1c2937] rounded-[10px] p-6 box-border relative">
+    <div className="fixed inset-0 z-[300] bg-[rgba(4,9,15,0.75)] flex items-center justify-center px-4">
+      <div className="w-full max-w-[360px] bg-[#0a0f16] border border-[#1c2937] rounded-[10px] p-6 box-border relative">
         <button
           onClick={closeAuth}
           className="absolute top-4 right-[18px] bg-transparent border-none text-dim text-lg cursor-pointer leading-none"

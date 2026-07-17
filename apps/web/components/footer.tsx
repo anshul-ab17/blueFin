@@ -8,14 +8,13 @@ export default function Footer() {
         style={{ backgroundImage: "url('/assets/whale-tail-fish.jpg')", backgroundPosition: "center 30%" }}
       />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,14,24,0.88)_0%,rgba(6,14,24,0.96)_40%,#060e18_100%)]" />
-      <div className="relative max-w-[1280px] mx-auto px-10 pt-16 pb-7">
-        <div className="grid grid-cols-[1.4fr_1fr_1fr_1fr_1.4fr] gap-9 pb-11 border-b border-line-3">
+      <div className="relative max-w-[1280px] mx-auto px-5 md:px-10 pt-16 pb-7">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1.4fr] gap-9 pb-11 border-b border-line-3">
           <div>
             <div className="flex items-center gap-2.5 mb-3.5">
               <img src="/assets/bluefin-orca.svg" alt="Bluefin" className="w-[30px] h-[30px] object-contain orca-tint" />
               <span className="font-heading font-bold text-[15px] tracking-[3px] text-fg">BLUEFIN</span>
             </div>
-            <div className="font-semibold text-[13px] text-accent-soft mb-2.5">Ride the Waves of Chance.</div>
             <div className="font-semibold text-[13px] text-accent-soft mb-2.5">Trade the Game. Trust the Outcome.</div>
             <div className="font-medium text-[13px] leading-relaxed text-dim">
               Bluefin is a decentralized prediction market protocol for sports and real-world events. Trade with

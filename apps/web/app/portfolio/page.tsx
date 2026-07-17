@@ -24,7 +24,7 @@ export default function PortfolioPage() {
   const totalPayout = bets.reduce((a, b) => a + b.payout, 0);
 
   return (
-    <div className="max-w-[760px] mx-auto px-10 pt-12 pb-20">
+    <div className="max-w-[760px] mx-auto px-5 md:px-10 pt-12 pb-20">
       <PageBackdrop src="/assets/bg/water1.webp" />
       <PageTitle title="Portfolio" subtitle="Your wallet, activity, and preferences on Bluefin." />
 
@@ -36,7 +36,7 @@ export default function PortfolioPage() {
       ) : (
         <>
           <Reveal>
-            <div className="bg-[linear-gradient(135deg,#101f30,#0f2135)] border border-btn-border rounded-2xl p-6 flex items-center gap-[18px] mb-5 shadow-[0_16px_44px_rgba(47,111,237,0.14)]">
+            <div className="bg-[linear-gradient(135deg,#101f30,#0f2135)] border border-btn-border rounded-2xl p-6 flex flex-wrap items-center gap-[18px] mb-5 shadow-[0_16px_44px_rgba(47,111,237,0.14)]">
               <div className="w-14 h-14 rounded-full bg-btn border border-btn-border flex items-center justify-center">
                 <img
                   src="/assets/bluefin-orca.svg"
@@ -55,7 +55,7 @@ export default function PortfolioPage() {
               </span>
             </div>
           </Reveal>
-          <div className="grid grid-cols-3 gap-4 mb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
             <Reveal delay={80}>
               <StatBox label="Open Positions" value={<CountUp value={bets.length} />} />
             </Reveal>
@@ -71,7 +71,7 @@ export default function PortfolioPage() {
             </Reveal>
           </div>
           <Reveal delay={260}>
-            <div className="flex gap-3.5">
+            <div className="flex flex-col sm:flex-row gap-3.5">
               <Magnetic className="flex-1">
                 <Link
                   href="/bets"
