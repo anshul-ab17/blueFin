@@ -6,8 +6,200 @@ import Footer from "@/components/footer";
 import LiveDot from "@/components/live-dot";
 import PageBackdrop from "@/components/page-backdrop";
 import TeamBadge from "@/components/team-badge";
-import { CountUp, FillBar, Magnetic, Reveal } from "@/components/fx";
+import { CountUp, FillBar, HoverCard, Magnetic, Reveal } from "@/components/fx";
 import { FAQS, LIVE_NOW, RECENT_TRADES } from "@/lib/data";
+
+const ECO: Record<string, { name: string; role: string; accent: string; tag: string; body: string; img: string }> = {
+  bluefin:    { name: "Bluefin Protocol",  role: "The Protocol",          accent: "#4d9fff", tag: "bluefin.trade",              img: "/assets/logos/bluefin_dark.png",   body: "A decentralized prediction market for World Cup 2026. Buy YES or NO shares in real match outcomes — winning positions settle automatically the instant a verified result lands on-chain." },
+  txodds:     { name: "TxODDS · TxLINE",  role: "The Data Backbone",     accent: "#7db4ff", tag: "Official data & track sponsor", img: "/assets/logos/tx_dark.png",       body: "Real-time sports data streamed via TxLINE SSE feeds and hardened with cryptographic Merkle proofs. TxODDS powers every market resolution on Bluefin." },
+  solana:     { name: "Solana",            role: "The Settlement Layer",  accent: "#4ade80", tag: "Sub-second on-chain settlement", img: "/assets/logos/solana_dark.png",  body: "Every position, proof, and payout is anchored on Solana — sub-second finality, near-zero fees, and funds held in audited smart-contract escrow." },
+  tether:     { name: "Tether · USDT",    role: "The Currency",          accent: "#2dd4bf", tag: "Stable in, stable out",        img: "/assets/logos/usdt_dark.png",      body: "Stakes and payouts move in USDT — stable value in, stable value out. No volatility risk between prediction and settlement." },
+  superteam:  { name: "Superteam Earn",   role: "The Arena",             accent: "#8b8bf5", tag: "superteam.fun/earn",          img: "/assets/logos/superteam_dark.png", body: "The global builder network hosting the World Cup Hackathon. 82 teams entered the Prediction Markets & Settlement track — Bluefin is our answer." },
+};
+
+const ORBITS = [
+  { id: "superteam", ring: 96, dur: 34, delay: 0 },
+  { id: "solana",    ring: 96, dur: 34, delay: -17 },
+  { id: "tether",    ring: 64, dur: 21, delay: -5.3 },
+  { id: "txodds",    ring: 64, dur: 21, delay: -15.8 },
+];
+
+function EcosystemSection() {
+  const [sel, setSel] = useState("bluefin");
+  const stageRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const eco = ECO[sel];
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const setPS = (v: string) =>
+      stage.querySelectorAll("[data-orbit]").forEach((el) => {
+        (el as HTMLElement).style.animationPlayState = v;
+      });
+    const onEnter = () => setPS("paused");
+    const onMove = (e: MouseEvent) => {
+      const r = stage.getBoundingClientRect();
+      const dx = (e.clientX - r.left) / r.width - 0.5;
+      const dy = (e.clientY - r.top) / r.height - 0.5;
+      if (innerRef.current)
+        innerRef.current.style.transform = `translate(${(dx * 14).toFixed(1)}px,${(dy * 14).toFixed(1)}px)`;
+    };
+    const onLeave = () => {
+      setPS("running");
+      if (innerRef.current) innerRef.current.style.transform = "none";
+    };
+    stage.addEventListener("mouseenter", onEnter);
+    stage.addEventListener("mousemove", onMove);
+    stage.addEventListener("mouseleave", onLeave);
+    return () => {
+      stage.removeEventListener("mouseenter", onEnter);
+      stage.removeEventListener("mousemove", onMove);
+      stage.removeEventListener("mouseleave", onLeave);
+    };
+  }, []);
+
+  return (
+    <div id="about-section" className="py-[88px] border-b border-line">
+      {/* Header */}
+      <div className="text-center mb-14">
+        <Reveal>
+          <div className="font-bold text-xs tracking-[2px] text-accent uppercase mb-2.5">Prediction Markets &amp; Settlement · by TxODDS</div>
+          <h2 className="font-heading font-bold text-[40px] m-0 mb-4 text-fg">One Whale. An Entire Ocean.</h2>
+        </Reveal>
+        <Reveal delay={80}>
+          <p className="font-medium text-base leading-[1.7] text-muted m-0 max-w-[520px] mx-auto">
+            Bluefin runs on real-time data, settles on Solana, pays out in USDT, and was born inside the world's biggest builder hackathon. Hover a logo to explore the ecosystem.
+          </p>
+        </Reveal>
+      </div>
+
+      {/* Constellation grid */}
+      <div className="grid grid-cols-[1fr_1.05fr] gap-12 items-center max-w-[1100px] mx-auto">
+        {/* Info panel — HoverCard + animated content swap */}
+        <Reveal delay={100}>
+          <HoverCard
+            className="rounded-2xl p-7 transition-[border-color,box-shadow] duration-[400ms] ease-in-out"
+            style={{ border: `1px solid ${eco.accent}`, background: "#101f30", boxShadow: `0 0 40px ${eco.accent}18` } as React.CSSProperties}
+          >
+            <div className="flex items-center gap-4 mb-5">
+              <div
+                className="w-[64px] h-[64px] rounded-2xl bg-[#0c1828] overflow-hidden flex items-center justify-center shrink-0 p-2.5 transition-all duration-300"
+                style={{ border: `1px solid ${eco.accent}55`, boxShadow: `0 0 18px ${eco.accent}33` }}
+              >
+                <img src={eco.img} alt={eco.name} className="w-full h-full object-contain" />
+              </div>
+              <div>
+                <div className="font-heading font-bold text-[18px] text-fg transition-colors duration-300">{eco.name}</div>
+                <div className="font-bold text-[12px] tracking-[1px] uppercase transition-colors duration-300" style={{ color: eco.accent }}>
+                  {eco.role}
+                </div>
+              </div>
+            </div>
+            <p className="font-medium text-sm leading-[1.75] text-muted m-0 mb-5 transition-all duration-300">{eco.body}</p>
+            <div
+              className="inline-flex items-center gap-2 border border-[#2a3a4d] rounded-lg px-3 py-1.5 font-heading font-bold text-xs transition-colors duration-300"
+              style={{ background: `${eco.accent}14`, color: eco.accent, borderColor: `${eco.accent}44` }}
+            >
+              {eco.tag}
+            </div>
+          </HoverCard>
+        </Reveal>
+
+        {/* Constellation */}
+        <Reveal delay={160}>
+          <div
+            ref={stageRef}
+            className="relative aspect-square w-full max-w-[480px] mx-auto select-none"
+          >
+            <div ref={innerRef} className="absolute inset-0" style={{ transition: "transform 0.4s ease-out" }}>
+              {/* Decorative orbit rings */}
+              <div
+                data-orbit
+                className="absolute rounded-full border border-dashed border-[#2a3a4d]"
+                style={{ top: "50%", left: "50%", width: "64%", height: "64%", marginLeft: "-32%", marginTop: "-32%", animation: "spin-orbit 90s linear infinite" }}
+              />
+              <div
+                data-orbit
+                className="absolute rounded-full border border-dashed border-[#22344a]"
+                style={{ top: "50%", left: "50%", width: "96%", height: "96%", marginLeft: "-48%", marginTop: "-48%", animation: "spinrev-orbit 130s linear infinite" }}
+              />
+
+              {/* Orbiting logos */}
+              {ORBITS.map((o) => {
+                const half = o.ring / 2;
+                const isOn = sel === o.id;
+                const e = ECO[o.id];
+                return (
+                  <div
+                    key={o.id}
+                    data-orbit
+                    className="absolute pointer-events-none"
+                    style={{
+                      top: "50%", left: "50%",
+                      width: `${o.ring}%`, height: `${o.ring}%`,
+                      marginLeft: `-${half}%`, marginTop: `-${half}%`,
+                      animation: `spin-orbit ${o.dur}s linear ${o.delay}s infinite`,
+                    }}
+                  >
+                    {/* Counter-rotate to keep logo upright */}
+                    <div
+                      data-orbit
+                      className="absolute pointer-events-auto"
+                      style={{ top: 0, left: "50%", width: 0, height: 0, animation: `spinrev-orbit ${o.dur}s linear ${o.delay}s infinite` }}
+                    >
+                      <div className="absolute flex flex-col items-center gap-1.5" style={{ top: -32, left: -32 }}>
+                        <button
+                          onMouseEnter={() => setSel(o.id)}
+                          onClick={() => setSel(o.id)}
+                          className="w-[66px] h-[66px] rounded-2xl border bg-[#0c1828] overflow-hidden flex items-center justify-center p-2.5 cursor-pointer transition-all duration-300 hover:scale-110"
+                          style={{
+                            borderColor: isOn ? e.accent : "#1e3048",
+                            boxShadow: isOn ? `0 0 20px ${e.accent}66, 0 4px 16px rgba(4,10,18,0.8)` : "0 4px 16px rgba(4,10,18,0.7)",
+                          }}
+                        >
+                          <img src={e.img} alt={e.name} className="w-full h-full object-contain" />
+                        </button>
+                        <span
+                          className="font-heading font-bold text-[10px] tracking-[0.8px] bg-[rgba(8,16,28,0.9)] px-2 py-0.5 rounded-md whitespace-nowrap transition-colors duration-300 border border-[#1e3048]"
+                          style={{ color: isOn ? e.accent : "#4a6280" }}
+                        >
+                          {o.id === "txodds" ? "TXLINE" : e.name.split(" ")[0].toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Central Bluefin */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2">
+                <button
+                  onMouseEnter={() => setSel("bluefin")}
+                  onClick={() => setSel("bluefin")}
+                  className="w-[112px] h-[112px] rounded-full border-2 bg-[#0c1828] overflow-hidden flex items-center justify-center p-3 cursor-pointer transition-all duration-300"
+                  style={{
+                    borderColor: sel === "bluefin" ? "#4d9fff" : "#2f5fa8",
+                    animation: "glowpulse 3.5s ease-in-out infinite",
+                  }}
+                >
+                  <img src="/assets/logos/bluefin_dark.png" alt="Bluefin" className="w-full h-full object-contain" style={{ animation: "bobfloat 4s ease-in-out infinite" }} />
+                </button>
+                <span
+                  className="font-heading font-bold text-[11px] tracking-[1px] bg-[rgba(10,20,31,0.82)] px-2.5 py-0.5 rounded-md transition-colors duration-300"
+                  style={{ color: sel === "bluefin" ? "#4d9fff" : "#93a7bc" }}
+                >
+                  BLUEFIN
+                </span>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+
+    </div>
+  );
+}
 
 const HERO_STATS = [
   { value: 24.85, decimals: 2, prefix: "$", suffix: "M", label: "Total Volume" },
@@ -97,10 +289,10 @@ function Splash() {
 }
 
 function Ticker() {
-  const items = [...RECENT_TRADES, ...RECENT_TRADES, ...RECENT_TRADES, ...RECENT_TRADES];
+  const items = [...RECENT_TRADES, ...RECENT_TRADES];
   return (
     <div className="border-y border-line bg-[#0c1826] overflow-hidden py-[13px]">
-      <div className="inline-flex gap-11 whitespace-nowrap w-max animate-[marquee_28s_linear_infinite]">
+      <div className="inline-flex gap-11 whitespace-nowrap w-max animate-marquee">
         {items.map((t, i) => (
           <span key={i} className="inline-flex items-center gap-2.5">
             <span
@@ -365,16 +557,16 @@ export default function Home() {
         <div className="grid grid-cols-4 gap-4 py-10 border-b border-line">
           {HERO_STATS.map((s, i) => (
             <Reveal key={s.label} delay={i * 80}>
-              <div className="bg-panel border border-line rounded-xl p-5 text-center hover:border-line-2 transition-colors">
+              <HoverCard className="bg-panel border border-line rounded-xl p-5 text-center hover:border-btn-border hover:-translate-y-[3px] transition-all duration-[250ms]">
                 <CountUp
                   value={s.value}
                   decimals={s.decimals}
                   prefix={s.prefix}
                   suffix={s.suffix}
-                  className="font-heading font-bold text-[26px] text-white"
+                  className="font-heading font-bold text-[26px] text-white group-hover:text-accent-soft transition-colors duration-300"
                 />
-                <div className="font-semibold text-xs text-dim uppercase tracking-[0.5px]">{s.label}</div>
-              </div>
+                <div className="font-semibold text-xs text-dim uppercase tracking-[0.5px] group-hover:text-muted transition-colors duration-300">{s.label}</div>
+              </HoverCard>
             </Reveal>
           ))}
         </div>
@@ -395,25 +587,35 @@ export default function Home() {
           <div className="grid grid-cols-3 gap-4">
             {LIVE_NOW.map((m, i) => (
               <Reveal key={i} delay={i * 100}>
-                <Link
-                  href={`/trade/${m.id}`}
-                  className="bg-panel border border-line rounded-[14px] p-5 cursor-pointer flex flex-col gap-3.5 no-underline transition-all duration-[250ms] hover:-translate-y-[5px] hover:border-btn-border hover:shadow-[0_14px_34px_rgba(47,111,237,0.18)]"
-                >
+                <HoverCard className="bg-panel border border-line rounded-[14px] p-5 transition-all duration-[250ms] hover:-translate-y-[5px] hover:border-btn-border hover:shadow-[0_14px_34px_rgba(47,111,237,0.18)]">
+                  <Link href={`/trade/${m.id}`} className="absolute inset-0 z-[2] rounded-[14px]" aria-label={m.title} />
                   <div className="flex items-center justify-between">
-                    <div className="font-bold text-sm text-fg">{m.title}</div>
+                    <div className="relative overflow-hidden font-bold text-sm text-fg h-[1.3em]">
+                      <span className="block transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-full">
+                        {m.title}
+                      </span>
+                      <span className="block absolute inset-0 translate-y-full transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 text-accent" aria-hidden>
+                        {m.title}
+                      </span>
+                    </div>
                     <span className="inline-flex items-center gap-1.5 font-heading font-bold text-[10px] tracking-[1px] bg-[rgba(34,197,94,0.15)] border border-live text-win px-2 py-[3px] rounded-[10px]">
                       <LiveDot size={5} />
                       LIVE
                     </span>
                   </div>
-                  <div className="font-semibold text-xs text-dim">World Cup 2026</div>
+                  <div className="font-semibold text-xs text-dim group-hover:text-muted transition-colors duration-300">World Cup 2026</div>
                   <div className="flex items-center gap-3">
-                    <TeamBadge code={m.codeA} color={m.colorA} size="sm" />
-                    <span className="font-heading font-bold text-2xl text-white">{m.score}</span>
-                    <TeamBadge code={m.codeB} color={m.colorB} size="sm" />
+                    <span className="text-xl">{m.flagA}</span>
+                    <span className="font-heading font-bold text-2xl text-white group-hover:text-accent-soft transition-colors duration-300">{m.score}</span>
+                    <span className="text-xl">{m.flagB}</span>
                   </div>
-                  <div className="font-semibold text-xs text-muted">{m.clock}</div>
-                </Link>
+                  <div className="flex items-center gap-2">
+                    <TeamBadge code={m.codeA} color={m.colorA} size="sm" />
+                    <span className="font-semibold text-[11px] text-dim">vs</span>
+                    <TeamBadge code={m.codeB} color={m.colorB} size="sm" />
+                    <span className="font-semibold text-xs text-muted ml-1 group-hover:text-accent transition-colors duration-300">{m.clock}</span>
+                  </div>
+                </HoverCard>
               </Reveal>
             ))}
           </div>
@@ -453,67 +655,23 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-4">
             {QUICK_STATS.map((s, i) => (
               <Reveal key={s.label} delay={i * 80}>
-                <div className="bg-panel border border-line rounded-[14px] p-[26px] text-center hover:border-btn-border transition-colors">
+                <HoverCard className="bg-panel border border-line rounded-[14px] p-[26px] text-center hover:border-btn-border hover:-translate-y-[3px] transition-all duration-[250ms]">
                   <CountUp
                     value={s.value}
                     decimals={s.decimals}
                     prefix={s.prefix}
                     suffix={s.suffix}
-                    className="font-heading font-bold text-[28px] text-accent"
+                    className="font-heading font-bold text-[28px] text-accent group-hover:text-accent-soft transition-colors duration-300"
                   />
-                  <div className="font-semibold text-xs text-dim uppercase">{s.label}</div>
-                </div>
+                  <div className="font-semibold text-xs text-dim uppercase group-hover:text-muted transition-colors duration-300">{s.label}</div>
+                </HoverCard>
               </Reveal>
             ))}
           </div>
         </div>
 
-        {/* ABOUT */}
-        <div id="about-section" className="py-[88px] border-b border-line grid grid-cols-[1.1fr_0.9fr] gap-14 items-center">
-          <div>
-            <Reveal>
-              <h2 className="font-heading font-bold text-[40px] m-0 mb-[18px] text-fg">About Bluefin</h2>
-            </Reveal>
-            <Reveal delay={80}>
-              <p className="font-medium text-base leading-[1.7] text-muted m-0 mb-9">
-                Bluefin is a decentralized prediction market protocol designed to bring transparency, liquidity, and
-                fairness to every prediction. We believe the future is uncertain, but markets can make it clearer.
-              </p>
-            </Reveal>
-            <div className="grid grid-cols-2 gap-4 mb-9">
-              {[
-                ["Decentralized", "No single entity controls the market."],
-                ["Transparent", "All data and transactions are on-chain."],
-                ["Secure", "Audited smart contracts and verifiable data."],
-                ["Community Driven", "Built by traders, for traders."],
-              ].map(([t, b], i) => (
-                <Reveal key={t} delay={120 + i * 60}>
-                  <div className="font-bold text-[15px] text-fg mb-1.5">{t}</div>
-                  <div className="font-medium text-[13px] text-muted">{b}</div>
-                </Reveal>
-              ))}
-            </div>
-            <Reveal delay={200}>
-              <div className="flex gap-10 flex-wrap">
-                {[
-                  ["Backed by", "The Community"],
-                  ["Built on", "Solana"],
-                  ["Data by", "TxODDS · TxLINE"],
-                ].map(([t, b]) => (
-                  <div key={t}>
-                    <div className="font-semibold text-xs text-dim uppercase mb-1">{t}</div>
-                    <div className="font-heading font-bold text-base text-fg">{b}</div>
-                  </div>
-                ))}
-              </div>
-            </Reveal>
-          </div>
-          <Reveal delay={120}>
-            <div className="rounded-2xl overflow-hidden aspect-square">
-              <img src="/assets/orca-solo.jpg" alt="Orca" className="w-full h-full object-cover block" />
-            </div>
-          </Reveal>
-        </div>
+        {/* ABOUT — ecosystem constellation */}
+        <EcosystemSection />
 
         {/* APP PREVIEW */}
         <div className="py-[88px] border-b border-line">
