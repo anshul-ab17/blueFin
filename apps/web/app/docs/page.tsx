@@ -36,6 +36,7 @@ const STACK = [
   { layer: "Backend", tech: "Rust · Axum · SQLite", role: "TxLINE ingestion, market pricing, positions, settlement worker" },
   { layer: "Data", tech: "TxODDS TxLINE", role: "Fixtures, real-time scores and odds, Merkle validation proofs" },
   { layer: "Chain", tech: "Solana · Anchor · USDT", role: "Escrow, positions, proof-anchored settlement, payouts" },
+  { layer: "Edge", tech: "Vercel · Cloudflare", role: "Global CDN, DNS, DDoS protection, TLS" },
 ];
 
 function SectionHeading({ kicker, title }: { kicker: string; title: string }) {
