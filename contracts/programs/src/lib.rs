@@ -11,6 +11,16 @@ pub use state::*;
 
 declare_id!("BbeCFPpsNTi5sqBNWjeXPtAitzqnDhYEMVxkLQodNH3B");
 
+#[cfg(not(feature = "no-entrypoint"))]
+solana_security_txt::security_txt! {
+    name: "Bluefin",
+    project_url: "https://blue-fin.vercel.app",
+    contacts: "email:anshul.ab17x@gmail.com",
+    policy: "https://blue-fin.vercel.app/.well-known/security.txt",
+    preferred_languages: "en",
+    source_code: "https://github.com/anshul-ab17/blueFin"
+}
+
 #[program]
 pub mod bluefin {
     use super::*;
