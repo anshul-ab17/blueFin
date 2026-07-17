@@ -157,9 +157,9 @@ export const RECENT_TRADES = [
 ];
 
 export const LIVE_NOW = [
-  { id: "arg-fra", title: "ARG vs FRA", codeA: "ARG", colorA: "#3f7dbf", codeB: "FRA", colorB: "#1565c0", score: "2 - 1", clock: "45:32 · 2nd Half" },
-  { id: "bra-ger", title: "BRA vs GER", codeA: "BRA", colorA: "#1c8a3c", codeB: "GER", colorB: "#2b2b2b", score: "1 - 0", clock: "32:11 · 1st Half" },
-  { id: "arg-fra", title: "ENG vs POR", codeA: "ENG", colorA: "#8c2332", codeB: "POR", colorB: "#a01e28", score: "0 - 0", clock: "10:45 · 1st Half" },
+  { id: "arg-fra", title: "ARG vs FRA", flagA: "🇦🇷", flagB: "🇫🇷", codeA: "ARG", colorA: "#3f7dbf", codeB: "FRA", colorB: "#1565c0", score: "2 - 1", clock: "45:32 · 2nd Half" },
+  { id: "bra-ger", title: "BRA vs GER", flagA: "🇧🇷", flagB: "🇩🇪", codeA: "BRA", colorA: "#1c8a3c", codeB: "GER", colorB: "#2b2b2b", score: "1 - 0", clock: "32:11 · 1st Half" },
+  { id: "arg-fra", title: "ENG vs POR", flagA: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", flagB: "🇵🇹", codeA: "ENG", colorA: "#8c2332", codeB: "POR", colorB: "#a01e28", score: "0 - 0", clock: "10:45 · 1st Half" },
 ];
 
 export const FAQS = [
