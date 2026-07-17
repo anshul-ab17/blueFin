@@ -2,6 +2,7 @@ mod config;
 mod db;
 mod http;
 mod state;
+mod txline;
 
 use tracing_subscriber::EnvFilter;
 
