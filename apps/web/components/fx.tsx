@@ -2,7 +2,7 @@
 
 // Shared motion primitives ported from the redesign mockups' fx.js:
 // scroll reveals, count-ups, animated percentage bars, magnetic hover.
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 function useInView<T extends HTMLElement>(rootMargin = "0px 0px -8% 0px") {
   const ref = useRef<T>(null);
@@ -118,6 +118,38 @@ export function Magnetic({ children, className = "" }: { children: ReactNode; cl
       }}
     >
       {children}
+    </div>
+  );
+}
+
+// Card with cursor-tracking spotlight + full-color fill on hover.
+// Add `group` children targeting works automatically.
+// For Link cards: put a `absolute inset-0 z-[2] rounded-[inherit]` Link inside as click target.
+export function HoverCard({ children, className = "", style }: { children: ReactNode; className?: string; style?: CSSProperties }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState({ x: 50, y: 50 });
+  const [over, setOver] = useState(false);
+  return (
+    <div
+      ref={ref}
+      style={style}
+      className={`relative overflow-hidden group ${className}`}
+      onMouseMove={(e) => {
+        const r = ref.current!.getBoundingClientRect();
+        setPos({ x: ((e.clientX - r.left) / r.width) * 100, y: ((e.clientY - r.top) / r.height) * 100 });
+      }}
+      onMouseEnter={() => setOver(true)}
+      onMouseLeave={() => setOver(false)}
+    >
+      <div
+        className="absolute inset-0 pointer-events-none rounded-[inherit] transition-opacity duration-300 z-0"
+        style={{ opacity: over ? 1 : 0, background: "linear-gradient(135deg,rgba(11,26,52,0.92) 0%,rgba(22,46,90,0.65) 100%)" }}
+      />
+      <div
+        className="absolute inset-0 pointer-events-none rounded-[inherit] transition-opacity duration-200 z-0"
+        style={{ opacity: over ? 1 : 0, background: `radial-gradient(circle at ${pos.x}% ${pos.y}%,rgba(77,159,255,0.28) 0%,transparent 55%)` }}
+      />
+      <div className="relative z-[1]">{children}</div>
     </div>
   );
 }
