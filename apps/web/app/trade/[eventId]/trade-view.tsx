@@ -6,7 +6,7 @@ import type { MatchEvent, Outcome, Side } from "@bluefin/types";
 import TeamBadge from "@/components/team-badge";
 import LiveDot from "@/components/live-dot";
 import PageBackdrop from "@/components/page-backdrop";
-import { FillBar, Magnetic, Reveal } from "@/components/fx";
+import { FillBar, HoverCard, Magnetic, Reveal } from "@/components/fx";
 import { RECENT_TRADES, SETTLEMENTS, TOP_TRADERS } from "@/lib/data";
 import { useAppStore } from "@/lib/store";
 
@@ -115,20 +115,23 @@ export default function TradeView({
         <div className="flex flex-col gap-3.5">
           {event.categories.map((cat, i) => (
             <Reveal key={cat.id} delay={i * 80}>
-              <div className="bg-panel border border-line rounded-[14px] p-5 transition-all duration-[250ms] hover:-translate-y-1 hover:border-btn-border">
+              <HoverCard className="bg-panel border border-line rounded-[14px] p-5 transition-all duration-[250ms] hover:-translate-y-1 hover:border-btn-border">
                 <div className="flex items-center justify-between mb-3.5">
                   <div>
-                    <div className="font-bold text-xs text-accent uppercase tracking-[0.5px] mb-1">{cat.label}</div>
-                    <div className="font-bold text-[15px] text-fg">{cat.question}</div>
+                    <div className="font-bold text-xs text-accent uppercase tracking-[0.5px] mb-1 group-hover:text-accent-soft transition-colors duration-300">{cat.label}</div>
+                    <div className="relative overflow-hidden font-bold text-[15px] text-fg h-[1.4em]">
+                      <span className="block transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-full">{cat.question}</span>
+                      <span className="block absolute inset-0 translate-y-full transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-y-0 text-accent-soft" aria-hidden>{cat.question}</span>
+                    </div>
                   </div>
-                  <div className="font-semibold text-xs text-dim">{cat.vol} Vol</div>
+                  <div className="font-semibold text-xs text-dim group-hover:text-muted transition-colors duration-300">{cat.vol} Vol</div>
                 </div>
                 <div className="flex flex-col gap-2.5">
                   {cat.outcomes.map((row, j) => (
                     <div key={row.label} className="flex items-center gap-3.5">
-                      <div className="w-[110px] font-semibold text-[13px] text-soft-fg">{row.label}</div>
+                      <div className="w-[110px] font-semibold text-[13px] text-soft-fg group-hover:text-fg transition-colors duration-300">{row.label}</div>
                       <FillBar pct={row.pct} barClass={j === 0 ? "bg-accent" : "bg-faint"} />
-                      <span className="font-heading font-bold text-xs text-muted w-9 text-right">{row.pct}%</span>
+                      <span className="font-heading font-bold text-xs text-muted w-9 text-right group-hover:text-accent-soft transition-colors duration-300">{row.pct}%</span>
                       <button
                         onClick={() => pick(cat.label, row, "YES")}
                         className="bg-btn border border-btn-border text-accent-soft font-heading font-bold text-xs px-3 py-[7px] rounded-md cursor-pointer transition-all hover:bg-[#24498a] hover:shadow-[0_0_16px_rgba(77,159,255,0.3)]"
@@ -144,7 +147,7 @@ export default function TradeView({
                     </div>
                   ))}
                 </div>
-              </div>
+              </HoverCard>
             </Reveal>
           ))}
 
