@@ -28,6 +28,10 @@
   --animate-bobfloat: bobfloat 3s ease-in-out infinite;
   --animate-waverotate: waverotate 9s linear infinite;
   --animate-waverotate-rev: waverotate 13s linear infinite reverse;
+  --animate-marquee: marquee 28s linear infinite;
+  --animate-spin-slow: spin-orbit 34s linear infinite;
+  --animate-spinrev-slow: spinrev-orbit 34s linear infinite;
+  --animate-glowpulse: glowpulse 3.5s ease-in-out infinite;
 
   @keyframes livepulse {
     0%, 100% { opacity: 1; }
@@ -41,6 +45,36 @@
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
   }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes spin-orbit {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes spinrev-orbit {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
+  }
+  @keyframes glowpulse {
+    0%, 100% { box-shadow: 0 0 40px rgba(77,159,255,0.25); }
+    50% { box-shadow: 0 0 70px rgba(77,159,255,0.5); }
+  }
+}
+
+/* Global keyframes for inline style animation usage */
+@keyframes spin-orbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes spinrev-orbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+@keyframes glowpulse {
+  0%, 100% { box-shadow: 0 0 40px rgba(77,159,255,0.25); }
+  50% { box-shadow: 0 0 70px rgba(77,159,255,0.5); }
 }
 
 @keyframes lineup {
@@ -54,10 +88,6 @@
 @keyframes kenburns {
   from { transform: scale(1.02); }
   to { transform: scale(1.14); }
-}
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
 }
 @keyframes scrollhint {
   0%, 100% { transform: translateY(0); opacity: 0.9; }
