@@ -471,11 +471,17 @@ function HowItWorks() {
 
 export default function Home() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const d = HERO_BASE_DELAY;
+  // splash only once per browser session; on reload skip it and drop the hero delay
+  const [skipSplash, setSkipSplash] = useState(false);
+  useEffect(() => {
+    if (sessionStorage.getItem("bluefin-splash-seen")) setSkipSplash(true);
+    else sessionStorage.setItem("bluefin-splash-seen", "1");
+  }, []);
+  const d = skipSplash ? 0 : HERO_BASE_DELAY;
 
   return (
     <div>
-      <Splash />
+      {!skipSplash && <Splash />}
       <PageBackdrop src="/assets/bg/deep-water.png" opacity={1} />
 
       {/* HERO */}
