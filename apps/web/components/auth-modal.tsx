@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletReadyState, type WalletName } from "@solana/wallet-adapter-base";
 import { useAppStore } from "@/lib/store";
@@ -48,14 +49,17 @@ export default function AuthModal() {
   const flashToast = useAppStore((s) => s.flashToast);
   const { wallets, wallet, select, connect } = useWallet();
   const [pending, setPending] = useState<WalletName | null>(null);
+  const router = useRouter();
 
   // connect only after the provider has flushed the selection, otherwise the
   // connect event fires before the provider subscribes and the UI never updates
   useEffect(() => {
     if (!pending || wallet?.adapter.name !== pending) return;
     setPending(null);
-    connect().catch(() => flashToast("Wallet connection cancelled"));
-  }, [pending, wallet, connect, flashToast]);
+    connect()
+      .then(() => router.push("/markets"))
+      .catch(() => flashToast("Wallet connection cancelled"));
+  }, [pending, wallet, connect, flashToast, router]);
 
   if (!authOpen) return null;
 

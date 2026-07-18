@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import ConnectPrompt from "@/components/connect-prompt";
 import PageBackdrop from "@/components/page-backdrop";
@@ -14,10 +15,12 @@ export default function PortfolioPage() {
   const disconnect = useAppStore((s) => s.disconnect);
   const bets = useAppStore((s) => s.bets);
   const { disconnect: disconnectAdapter, connected: adapterConnected } = useWallet();
+  const router = useRouter();
 
   const handleDisconnect = () => {
     if (adapterConnected) void disconnectAdapter();
     disconnect();
+    router.push("/");
   };
 
   const totalStaked = bets.reduce((a, b) => a + b.stake, 0);

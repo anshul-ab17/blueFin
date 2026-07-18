@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useAppStore } from "@/lib/store";
 import { WALLET_BALANCE } from "@/lib/data";
@@ -41,7 +41,9 @@ function NavButton({
 
 export default function Nav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [walletMenuOpen, setWalletMenuOpen] = useState(false);
   const isHome = pathname === "/" || pathname === "/docs";
   const walletConnected = useAppStore((s) => s.walletConnected);
   const walletAddress = useAppStore((s) => s.walletAddress);
@@ -49,9 +51,11 @@ export default function Nav() {
   const disconnect = useAppStore((s) => s.disconnect);
   const { disconnect: disconnectAdapter, connected: adapterConnected } = useWallet();
 
-  const handleDisconnect = () => {
+  const handleLogout = () => {
     if (adapterConnected) void disconnectAdapter();
     disconnect();
+    setWalletMenuOpen(false);
+    router.push("/");
   };
 
   const closeMenu = () => setMenuOpen(false);
@@ -61,6 +65,7 @@ export default function Nav() {
       <NavButton href="/" label="Home" active={pathname === "/"} onClick={closeMenu} />
       {isHome ? (
         <>
+          <NavButton href="/markets" label="Markets" active={false} onClick={closeMenu} />
           <NavButton href="/#about-section" label="About" active={false} onClick={closeMenu} />
           <NavButton href="/#how-it-works" label="How It Works" active={false} onClick={closeMenu} />
           <NavButton href="/#faq-section" label="FAQ" active={false} onClick={closeMenu} />
@@ -94,7 +99,8 @@ export default function Nav() {
         <div className="flex items-center gap-3 lg:gap-[30px]">
           <div className="hidden lg:flex items-center gap-5 uppercase">{links}</div>
           {walletConnected ? (
-            <button onClick={handleDisconnect} className="flex items-center gap-3 cursor-pointer bg-transparent border-none">
+            <div className="relative">
+            <button onClick={() => setWalletMenuOpen((v) => !v)} className="flex items-center gap-3 cursor-pointer bg-transparent border-none">
               <span className="hidden sm:block text-right leading-[1.2]">
                 <span className="block font-heading font-bold text-[13px] text-fg">{WALLET_BALANCE}</span>
                 <span className="block font-semibold text-[11px] text-dim">{walletAddress}</span>
@@ -106,6 +112,21 @@ export default function Nav() {
                 </svg>
               </span>
             </button>
+            {walletMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setWalletMenuOpen(false)} />
+                <div className="absolute right-0 top-[46px] z-50 min-w-[180px] bg-[#0a0f16] border border-[#1c2937] rounded-[10px] p-2 shadow-[0_12px_32px_rgba(0,0,0,0.5)]">
+                  <div className="px-3 py-2 font-semibold text-[11px] text-dim border-b border-[#1c2937]">{walletAddress}</div>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left bg-transparent border-none px-3 py-2.5 font-bold text-[13px] text-no cursor-pointer rounded-md hover:bg-[#12181f]"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </>
+            )}
+            </div>
           ) : (
             <button
               onClick={openAuth}
