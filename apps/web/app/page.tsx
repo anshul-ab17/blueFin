@@ -6,6 +6,7 @@ import Footer from "@/components/footer";
 import LiveDot from "@/components/live-dot";
 import PageBackdrop from "@/components/page-backdrop";
 import TeamBadge from "@/components/team-badge";
+import FlagIcon, { hasFlag } from "@/components/flag-icon";
 import { CountUp, FillBar, HoverCard, Magnetic, Reveal } from "@/components/fx";
 import { FAQS, LIVE_NOW, RECENT_TRADES } from "@/lib/data";
 
@@ -611,14 +612,12 @@ export default function Home() {
                   </div>
                   <div className="font-semibold text-xs text-dim group-hover:text-muted transition-colors duration-300">World Cup 2026</div>
                   <div className="flex items-center gap-3">
-                    <span className="text-xl">{m.flagA}</span>
+                    {hasFlag(m.codeA) ? <FlagIcon code={m.codeA} size="sm" /> : <TeamBadge code={m.codeA} color={m.colorA} size="sm" />}
                     <span className="font-heading font-bold text-2xl text-white group-hover:text-accent-soft transition-colors duration-300">{m.score}</span>
-                    <span className="text-xl">{m.flagB}</span>
+                    {hasFlag(m.codeB) ? <FlagIcon code={m.codeB} size="sm" /> : <TeamBadge code={m.codeB} color={m.colorB} size="sm" />}
                   </div>
                   <div className="flex items-center gap-2">
-                    <TeamBadge code={m.codeA} color={m.colorA} size="sm" />
                     <span className="font-semibold text-[11px] text-dim">vs</span>
-                    <TeamBadge code={m.codeB} color={m.colorB} size="sm" />
                     <span className="font-semibold text-xs text-muted ml-1 group-hover:text-accent transition-colors duration-300">{m.clock}</span>
                   </div>
                 </HoverCard>
@@ -707,7 +706,7 @@ export default function Home() {
             <div className="flex justify-center">
               <Magnetic>
                 <Link
-                  href="/trade/arg-fra"
+                  href="/trade/esp-arg"
                   className="inline-block bg-accent !text-white font-heading font-bold text-sm px-[26px] py-3.5 rounded-full no-underline shadow-[0_8px_24px_rgba(47,111,237,0.35)] hover:bg-accent-soft transition-colors"
                 >
                   Open Trade

@@ -9,7 +9,7 @@ import { WALLET_BALANCE } from "@/lib/data";
 
 const APP_LINKS = [
   { href: "/markets", label: "Markets" },
-  { href: "/trade/arg-fra", label: "Trade", match: "/trade" },
+  { href: "/trade/esp-arg", label: "Trade", match: "/trade" },
   { href: "/bets", label: "My Bets" },
   { href: "/proofs", label: "Stats & Proofs" },
   { href: "/portfolio", label: "Portfolio" },

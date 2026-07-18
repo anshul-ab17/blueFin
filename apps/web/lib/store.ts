@@ -21,10 +21,7 @@ export const useAppStore = create<AppState>((set) => ({
   walletConnected: false,
   walletAddress: "",
   authOpen: false,
-  bets: [
-    { id: 1, event: "Argentina vs France", category: "Match Result", outcome: "Argentina", side: "YES", stake: 120, odds: 1.48, payout: 177.6 },
-    { id: 2, event: "Brazil vs Germany", category: "Total Goals", outcome: "Under 2.5", side: "NO", stake: 60, odds: 1.62, payout: 97.2 },
-  ],
+  bets: [],
   toast: null,
   openAuth: () => set({ authOpen: true }),
   closeAuth: () => set({ authOpen: false }),

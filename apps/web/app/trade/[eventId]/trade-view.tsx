@@ -4,11 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import type { MatchEvent, Outcome, Side } from "@bluefin/types";
 import TeamBadge from "@/components/team-badge";
+import FlagIcon, { hasFlag } from "@/components/flag-icon";
 import LiveDot from "@/components/live-dot";
 import PageBackdrop from "@/components/page-backdrop";
 import { FillBar, HoverCard, Magnetic, Reveal } from "@/components/fx";
 import OddsChart from "@/components/odds-chart";
-import { FLAGS, RECENT_TRADES, SETTLEMENTS } from "@/lib/data";
+import { RECENT_TRADES, SETTLEMENTS } from "@/lib/data";
 import { useAppStore } from "@/lib/store";
 
 const QUICK_STAKES = [10, 25, 50, 100];
@@ -75,8 +76,8 @@ export default function TradeView({
       <Reveal>
         <div className="bg-panel border border-line rounded-2xl px-5 md:px-7 py-[22px] flex flex-wrap items-center justify-center md:justify-between gap-4 mb-[22px]">
           <div className="flex items-center gap-4">
-            {FLAGS[event.codeA]
-              ? <span className="text-5xl leading-none select-none">{FLAGS[event.codeA]}</span>
+            {hasFlag(event.codeA)
+              ? <FlagIcon code={event.codeA} size="lg" />
               : <TeamBadge code={event.codeA} color={event.colorA} size="md" />}
             <div className="text-center">
               {isLive && event.score ? (
@@ -90,8 +91,8 @@ export default function TradeView({
                 <div className="font-semibold text-sm text-muted">vs</div>
               )}
             </div>
-            {FLAGS[event.codeB]
-              ? <span className="text-5xl leading-none select-none">{FLAGS[event.codeB]}</span>
+            {hasFlag(event.codeB)
+              ? <FlagIcon code={event.codeB} size="lg" />
               : <TeamBadge code={event.codeB} color={event.colorB} size="md" />}
           </div>
           <div className="text-center">

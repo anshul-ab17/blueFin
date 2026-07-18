@@ -5,10 +5,11 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import type { MatchEvent } from "@bluefin/types";
 import TeamBadge from "@/components/team-badge";
+import FlagIcon, { hasFlag } from "@/components/flag-icon";
 import LiveDot from "@/components/live-dot";
 import PageBackdrop from "@/components/page-backdrop";
 import { FillBar, HoverCard, PageTitle, Reveal } from "@/components/fx";
-import { EVENTS, FLAGS } from "@/lib/data";
+import { EVENTS } from "@/lib/data";
 
 const FILTERS = [
   { id: "all", label: "All" },
@@ -125,11 +126,11 @@ export default function MarketsPage() {
             <HoverCard className="bg-panel border border-line rounded-[14px] p-[22px] transition-all duration-[250ms] hover:-translate-y-[5px] hover:border-btn-border hover:shadow-[0_14px_34px_rgba(47,111,237,0.18)]">
               <Link href={`/trade/${ev.id}?category=${cat.id}`} className="absolute inset-0 z-[2] rounded-[14px]" aria-label={cat.question} />
               <div className="flex items-center gap-2 font-bold text-[15px] text-fg group-hover:text-white transition-colors duration-300">
-                {FLAGS[ev.codeA] ? <span className="text-lg leading-none">{FLAGS[ev.codeA]}</span> : <TeamBadge code={ev.codeA} color={ev.colorA} size="sm" />}
+                {hasFlag(ev.codeA) ? <FlagIcon code={ev.codeA} size="sm" /> : <TeamBadge code={ev.codeA} color={ev.colorA} size="sm" />}
                 <span>{ev.teamA}</span>
                 <span className="text-dim group-hover:text-muted transition-colors duration-300">vs</span>
                 <span>{ev.teamB}</span>
-                {FLAGS[ev.codeB] ? <span className="text-lg leading-none">{FLAGS[ev.codeB]}</span> : <TeamBadge code={ev.codeB} color={ev.colorB} size="sm" />}
+                {hasFlag(ev.codeB) ? <FlagIcon code={ev.codeB} size="sm" /> : <TeamBadge code={ev.codeB} color={ev.colorB} size="sm" />}
               </div>
               {ev.status === "live" ? (
                 <div className="flex items-center gap-1.5">

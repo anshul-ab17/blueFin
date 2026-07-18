@@ -1,11 +1,7 @@
 import type { MatchEvent, Proof } from "@bluefin/types";
 
-// country code → flag emoji; fallback to TeamBadge when a code is missing
-export const FLAGS: Record<string, string> = {
-  ARG: "🇦🇷", FRA: "🇫🇷", BRA: "🇧🇷", GER: "🇩🇪", ENG: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", POR: "🇵🇹",
-  ESP: "🇪🇸", NED: "🇳🇱", USA: "🇺🇸", MEX: "🇲🇽", JPN: "🇯🇵", KOR: "🇰🇷",
-  ITA: "🇮🇹", BEL: "🇧🇪", CRO: "🇭🇷", URU: "🇺🇾", CAN: "🇨🇦", MAR: "🇲🇦",
-};
+// kept for any legacy emoji fallback references; real flag rendering uses FlagIcon component
+export const FLAGS: Record<string, string> = {};
 
 export const EVENTS: MatchEvent[] = [
   {
@@ -54,58 +50,58 @@ export const EVENTS: MatchEvent[] = [
     ],
   },
   {
-    id: "arg-fra",
-    teamA: "Argentina",
-    teamB: "France",
-    codeA: "ARG",
-    colorA: "#3f7dbf",
-    codeB: "FRA",
-    colorB: "#1565c0",
+    id: "esp-arg",
+    teamA: "Spain",
+    teamB: "Argentina",
+    codeA: "ESP",
+    colorA: "#c60b1e",
+    codeB: "ARG",
+    colorB: "#3f7dbf",
     status: "live",
     dateLabel: "World Cup 2026 · Final",
-    score: { a: 2, b: 1 },
-    timeRemaining: "45:32 · 2nd Half",
+    score: { a: 1, b: 1 },
+    timeRemaining: "67:14 · 2nd Half",
     categories: [
       {
         id: "result",
         label: "Match Result",
-        question: "Full-time result: Argentina vs France",
-        vol: "$1.25M",
+        question: "Full-time result: Spain vs Argentina",
+        vol: "$1.42M",
         outcomes: [
-          { label: "Argentina", pct: 68, yesOdds: 1.48, noOdds: 2.65 },
-          { label: "France", pct: 27, yesOdds: 3.2, noOdds: 1.35 },
-          { label: "Draw", pct: 5, yesOdds: 8.5, noOdds: 1.08 },
+          { label: "Argentina", pct: 52, yesOdds: 1.92, noOdds: 2.05 },
+          { label: "Spain", pct: 38, yesOdds: 2.65, noOdds: 1.52 },
+          { label: "Draw", pct: 10, yesOdds: 6.8, noOdds: 1.12 },
         ],
       },
       {
         id: "totalgoals",
         label: "Total Goals",
-        question: "Total Goals: ARG vs FRA over/under 2.5",
-        vol: "$540K",
+        question: "Total Goals: ESP vs ARG over/under 2.5",
+        vol: "$610K",
         outcomes: [
-          { label: "Over 2.5", pct: 64, yesOdds: 1.55, noOdds: 2.4 },
-          { label: "Under 2.5", pct: 36, yesOdds: 2.75, noOdds: 1.4 },
+          { label: "Over 2.5", pct: 61, yesOdds: 1.65, noOdds: 2.2 },
+          { label: "Under 2.5", pct: 39, yesOdds: 2.55, noOdds: 1.45 },
         ],
       },
       {
         id: "nextgoal",
         label: "Next Goal",
         question: "Who scores next?",
-        vol: "$310K",
+        vol: "$340K",
         outcomes: [
-          { label: "Argentina", pct: 55, yesOdds: 1.75, noOdds: 2.05 },
-          { label: "France", pct: 32, yesOdds: 2.95, noOdds: 1.35 },
-          { label: "No More Goals", pct: 13, yesOdds: 6.8, noOdds: 1.08 },
+          { label: "Argentina", pct: 48, yesOdds: 2.05, noOdds: 1.95 },
+          { label: "Spain", pct: 38, yesOdds: 2.6, noOdds: 1.5 },
+          { label: "No More Goals", pct: 14, yesOdds: 6.2, noOdds: 1.1 },
         ],
       },
       {
         id: "scorer",
         label: "First Scorer",
-        question: "Will Mbappé score anytime?",
-        vol: "$620K",
+        question: "Will Lamine Yamal score anytime?",
+        vol: "$580K",
         outcomes: [
-          { label: "Mbappé", pct: 58, yesOdds: 1.62, noOdds: 2.25 },
-          { label: "Other / None", pct: 42, yesOdds: 2.2, noOdds: 1.65 },
+          { label: "Lamine Yamal", pct: 44, yesOdds: 2.25, noOdds: 1.78 },
+          { label: "Other / None", pct: 56, yesOdds: 1.78, noOdds: 2.15 },
         ],
       },
     ],
@@ -120,51 +116,51 @@ export const TOP_TRADERS = [
 ];
 
 export const SETTLEMENTS = [
-  { event: "Argentina vs England", outcome: "Semi Final: Argentina", time: "3d ago" },
-  { event: "France vs Spain", outcome: "Semi Final: France", time: "4d ago" },
-  { event: "Brazil vs Portugal", outcome: "Quarter Final: Over 2.5", time: "6d ago" },
+  { event: "Argentina vs France", outcome: "Semi Final: Argentina", time: "2d ago" },
+  { event: "Spain vs Brazil", outcome: "Semi Final: Spain", time: "2d ago" },
+  { event: "Germany vs Portugal", outcome: "Quarter Final: Over 2.5", time: "5d ago" },
 ];
 
 export const PROOFS: Proof[] = [
   {
     id: 1,
-    event: "Argentina vs England",
+    event: "Argentina vs France",
     market: "Semi Final · Match Result",
     outcome: "Argentina",
     root: "0x7f3a9c2e1b4d8f60a3c5e7d9b1a2f480c891",
     sig: "5xK2pQmnWtRb3vLc8fJhYd7uNq9rT2sZ4mAoP",
-    time: "Jul 16, 2026 · 21:47 UTC",
+    time: "Jul 17, 2026 · 21:47 UTC",
   },
   {
     id: 2,
-    event: "France vs Spain",
+    event: "Spain vs Brazil",
     market: "Semi Final · Match Result",
-    outcome: "France",
+    outcome: "Spain",
     root: "0x2b88e1f4c9a03d67e4f1b8a2c5d9e0f3a0d3",
     sig: "8vY7nHqLoWzXt1bE5rCf9mKa2sVd4yQp3nM",
-    time: "Jul 15, 2026 · 21:12 UTC",
+    time: "Jul 17, 2026 · 19:05 UTC",
   },
   {
     id: 3,
-    event: "Brazil vs Portugal",
+    event: "Germany vs Portugal",
     market: "Quarter Final · Total Goals",
     outcome: "Over 2.5",
     root: "0x94c1a7b053d8e2f6a1c4b9d7e0f3a8c6ff22",
     sig: "3mR5tUvXpQd8wLc1nJhF6yBa9zVe2sTo6cN",
-    time: "Jul 13, 2026 · 22:47 UTC",
+    time: "Jul 14, 2026 · 22:47 UTC",
   },
 ];
 
 export const RECENT_TRADES = [
-  { side: "YES" as const, label: "Argentina · Match Result", amount: "$450", time: "12s ago" },
-  { side: "NO" as const, label: "France · Match Result", amount: "$120", time: "48s ago" },
+  { side: "YES" as const, label: "Argentina · Match Result", amount: "$450", time: "8s ago" },
+  { side: "NO" as const, label: "Spain · Match Result", amount: "$180", time: "34s ago" },
   { side: "YES" as const, label: "Over 2.5 · Total Goals", amount: "$800", time: "1m ago" },
-  { side: "YES" as const, label: "Mbappé · First Scorer", amount: "$60", time: "2m ago" },
+  { side: "YES" as const, label: "Yamal · First Scorer", amount: "$95", time: "2m ago" },
   { side: "NO" as const, label: "Draw · Match Result", amount: "$210", time: "3m ago" },
 ];
 
 export const LIVE_NOW = [
-  { id: "arg-fra", title: "ARG vs FRA · FINAL", flagA: "🇦🇷", flagB: "🇫🇷", codeA: "ARG", colorA: "#3f7dbf", codeB: "FRA", colorB: "#1565c0", score: "2 - 1", clock: "45:32 · 2nd Half" },
+  { id: "esp-arg", title: "ESP vs ARG · FINAL", flagA: "🇪🇸", flagB: "🇦🇷", codeA: "ESP", colorA: "#c60b1e", codeB: "ARG", colorB: "#3f7dbf", score: "1 - 1", clock: "67:14 · 2nd Half" },
   { id: "bra-ger", title: "BRA vs GER · 3RD PLACE", flagA: "🇧🇷", flagB: "🇩🇪", codeA: "BRA", colorA: "#1c8a3c", codeB: "GER", colorB: "#2b2b2b", score: "1 - 0", clock: "32:11 · 1st Half" },
 ];
 

@@ -54,7 +54,7 @@ export default function Footer() {
             <div className="font-bold text-[13px] text-fg mb-3.5">Markets</div>
             <div className="flex flex-col gap-[9px] font-medium text-[13px] text-dim">
               <Link href="/markets" className="text-dim no-underline hover:text-accent-soft">All Markets</Link>
-              <Link href="/trade/arg-fra" className="text-dim no-underline hover:text-accent-soft">Live Now</Link>
+              <Link href="/trade/esp-arg" className="text-dim no-underline hover:text-accent-soft">Live Now</Link>
               <Link href="/markets" className="text-dim no-underline hover:text-accent-soft">World Cup 2026</Link>
               <Link href="/markets" className="text-dim no-underline hover:text-accent-soft">Football</Link>
             </div>
