@@ -41,31 +41,21 @@ function JupiterConsensus() {
   if (!data?.length) return null;
 
   return (
-    <div className="mt-12">
-      <Reveal>
-        <div className="flex items-baseline gap-3 mb-1.5">
-          <h2 className="font-heading font-bold text-[22px] m-0 text-fg">Live World Cup Consensus</h2>
-          <span className="font-bold text-[11px] tracking-[1px] text-dim uppercase">via Jupiter · display only</span>
-        </div>
-        <p className="font-medium text-[13px] text-dim m-0 mb-5">
-          Real-time implied probabilities from Jupiter prediction markets. TxLINE remains Bluefin&apos;s primary
-          data source and the source of truth for every settlement.
-        </p>
-      </Reveal>
+    <div className="mt-5">
       <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] gap-4">
-        {data.slice(0, 6).map((ev, i) => (
-          <Reveal key={ev.id} delay={(i % 6) * 60}>
-            <HoverCard className="bg-panel border border-line rounded-[14px] p-5 transition-all duration-[250ms] hover:-translate-y-[5px] hover:border-btn-border hover:shadow-[0_14px_34px_rgba(47,111,237,0.18)]">
+        {data.slice(0, 3).map((ev, i) => (
+          <Reveal key={ev.id} delay={i * 60}>
+            <HoverCard className="bg-panel border border-line rounded-[14px] p-5 transition-all duration-[250ms] hover:-translate-y-[5px] hover:border-btn-border hover:shadow-[0_14px_34px_rgba(47,111,237,0.18)] flex flex-col" style={{ minHeight: "148px" }}>
               <div className="flex items-center justify-between mb-3.5">
-                <div className="font-bold text-[14px] text-fg group-hover:text-accent-soft transition-colors duration-300">{ev.title}</div>
+                <div className="font-bold text-[14px] text-fg group-hover:text-accent-soft transition-colors duration-300 leading-tight">{ev.title}</div>
                 {ev.live && (
-                  <span className="flex items-center gap-1.5">
+                  <span className="flex items-center gap-1.5 shrink-0 ml-2">
                     <LiveDot />
                     <span className="font-heading font-bold text-[10px] text-live tracking-[1px]">LIVE</span>
                   </span>
                 )}
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 mt-auto">
                 {ev.outcomes.map((o) => (
                   <div key={o.label} className="flex items-center gap-2.5">
                     <span className="font-semibold text-[12px] text-muted w-[88px] shrink-0 truncate">{o.label}</span>
@@ -112,7 +102,7 @@ export default function MarketsPage() {
       <PageBackdrop src="/assets/bg/water2.webp" />
       <PageTitle
         eyebrow="World Cup 2026"
-        title="Active Markets"
+        title="Markets"
         subtitle="Trustless prediction markets settled on-chain, powered by TxLINE real-time data."
         size={40}
       />

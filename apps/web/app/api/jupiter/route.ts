@@ -42,7 +42,9 @@ export async function GET() {
           // prices are micro-USD per $1 contract → percent implied probability
           pct: Math.round((m.pricing!.buyYesPriceUsd / 1_000_000) * 100),
           vol: m.pricing!.volume,
-        })),
+        }))
+        .sort((a, b) => b.pct - a.pct)
+        .slice(0, 3),
     }))
     .filter((e) => e.outcomes.length > 0);
 
