@@ -8,7 +8,7 @@ import LiveDot from "@/components/live-dot";
 import PageBackdrop from "@/components/page-backdrop";
 import { FillBar, HoverCard, Magnetic, Reveal } from "@/components/fx";
 import OddsChart from "@/components/odds-chart";
-import { RECENT_TRADES, SETTLEMENTS, TOP_TRADERS } from "@/lib/data";
+import { FLAGS, RECENT_TRADES, SETTLEMENTS } from "@/lib/data";
 import { useAppStore } from "@/lib/store";
 
 const QUICK_STAKES = [10, 25, 50, 100];
@@ -75,7 +75,9 @@ export default function TradeView({
       <Reveal>
         <div className="bg-panel border border-line rounded-2xl px-5 md:px-7 py-[22px] flex flex-wrap items-center justify-center md:justify-between gap-4 mb-[22px]">
           <div className="flex items-center gap-4">
-            <TeamBadge code={event.codeA} color={event.colorA} size="md" />
+            {FLAGS[event.codeA]
+              ? <span className="text-5xl leading-none select-none">{FLAGS[event.codeA]}</span>
+              : <TeamBadge code={event.codeA} color={event.colorA} size="md" />}
             <div className="text-center">
               {isLive && event.score ? (
                 <>
@@ -88,7 +90,9 @@ export default function TradeView({
                 <div className="font-semibold text-sm text-muted">vs</div>
               )}
             </div>
-            <TeamBadge code={event.codeB} color={event.colorB} size="md" />
+            {FLAGS[event.codeB]
+              ? <span className="text-5xl leading-none select-none">{FLAGS[event.codeB]}</span>
+              : <TeamBadge code={event.codeB} color={event.colorB} size="md" />}
           </div>
           <div className="text-center">
             <div className="font-heading font-bold text-base text-fg">
@@ -261,20 +265,20 @@ export default function TradeView({
 
           <Reveal delay={240}>
             <div className="bg-panel border border-line rounded-[14px] p-[18px]">
-              <div className="font-heading font-bold text-[13px] text-fg mb-3">Top Traders (World Cup)</div>
+              <div className="font-heading font-bold text-[13px] text-fg mb-3">Volume by Market</div>
               <div className="flex flex-col gap-2.5">
-                {TOP_TRADERS.map((t) => (
-                  <div key={t.rank} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5 font-semibold text-[13px] text-fg">
-                      <span className="text-dim">{t.rank}</span>
-                      {t.name}
+                {event.categories.map((cat) => {
+                  const top = cat.outcomes.reduce((a, b) => (b.pct > a.pct ? b : a), cat.outcomes[0]);
+                  return (
+                    <div key={cat.id} className="flex items-center justify-between">
+                      <div className="font-semibold text-[13px] text-muted">{cat.label}</div>
+                      <div className="text-right">
+                        <div className="font-heading font-bold text-[13px] text-fg">{cat.vol}</div>
+                        <div className="font-semibold text-[11px] text-accent-soft">{top.label} {top.pct}%</div>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-heading font-bold text-[13px] text-fg">{t.volume}</div>
-                      <div className="font-semibold text-[11px] text-win">{t.change}</div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </Reveal>
