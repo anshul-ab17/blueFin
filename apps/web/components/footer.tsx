@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SubscribeForm from "@/components/subscribe-form";
 
 export default function Footer() {
   return (
@@ -69,16 +70,7 @@ export default function Footer() {
           <div>
             <div className="font-bold text-[13px] text-fg mb-3.5">Stay in the Ocean</div>
             <div className="font-medium text-[13px] text-dim mb-3">Get market updates and protocol news.</div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Enter your email"
-                className="flex-1 min-w-0 px-3.5 py-[11px] rounded-lg border border-line-3 bg-[#0a1624] text-fg font-medium text-[13px]"
-              />
-              <button className="bg-accent border-none text-white font-heading font-bold text-[13px] px-4 py-[11px] rounded-lg cursor-pointer">
-                →
-              </button>
-            </div>
+            <SubscribeForm />
           </div>
         </div>
         <div className="pt-[22px] text-center font-medium text-xs text-faint">

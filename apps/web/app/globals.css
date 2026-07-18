@@ -93,6 +93,14 @@
   0%, 100% { transform: translateY(0); opacity: 0.9; }
   50% { transform: translateY(8px); opacity: 0.4; }
 }
+@keyframes tickpop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes tickdraw {
+  to { stroke-dashoffset: 0; }
+}
 
 /* Masked line reveal: wrap text in .line-mask > .line-up */
 .line-mask {
