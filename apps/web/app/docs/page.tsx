@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Footer from "@/components/footer";
 import PageBackdrop from "@/components/page-backdrop";
-import { Reveal } from "@/components/fx";
+import { HoverCard, Magnetic, Reveal } from "@/components/fx";
 
 const LIFECYCLE = [
   { num: "01", title: "Discover", body: "Every World Cup 2026 fixture becomes a set of markets — match result, total goals, scorers. Markets are created automatically from the TxLINE fixtures feed." },
@@ -29,14 +29,6 @@ const TXLINE_POINTS = [
     title: "Solana anchoring",
     body: "Because TxODDS publishes validation accounts on Solana, anyone — not just Bluefin — can re-verify the data behind any settlement. The proof viewer on the Stats & Proofs page shows exactly this.",
   },
-];
-
-const STACK = [
-  { layer: "Frontend", tech: "Next.js · Tailwind · Solana wallet adapter", role: "Trading interface, live market views, proof viewer" },
-  { layer: "Backend", tech: "Rust · Axum · SQLite", role: "TxLINE ingestion, market pricing, positions, settlement worker" },
-  { layer: "Data", tech: "TxODDS TxLINE", role: "Fixtures, real-time scores and odds, Merkle validation proofs" },
-  { layer: "Chain", tech: "Solana · Anchor · USDT", role: "Escrow, positions, proof-anchored settlement, payouts" },
-  { layer: "Edge", tech: "Vercel · Cloudflare", role: "Global CDN, DNS, DDoS protection, TLS" },
 ];
 
 function SectionHeading({ kicker, title }: { kicker: string; title: string }) {
@@ -77,13 +69,13 @@ export default function DocsPage() {
           <div className="flex flex-col gap-4">
             {LIFECYCLE.map((s, i) => (
               <Reveal key={s.num} delay={i * 70}>
-                <div className="flex gap-5 bg-panel border border-line rounded-2xl p-6">
-                  <div className="font-heading font-bold text-[28px] leading-none text-[rgba(77,159,255,0.35)] shrink-0 w-11">{s.num}</div>
+                <HoverCard className="flex gap-5 bg-panel border border-line rounded-2xl p-6 transition-all duration-[250ms] hover:-translate-y-[5px] hover:border-btn-border hover:shadow-[0_14px_34px_rgba(47,111,237,0.18)]">
+                  <div className="font-heading font-bold text-[28px] leading-none text-[rgba(77,159,255,0.35)] shrink-0 w-11 group-hover:text-accent transition-colors duration-300">{s.num}</div>
                   <div>
-                    <div className="font-heading font-bold text-[17px] text-fg mb-1.5">{s.title}</div>
-                    <p className="font-medium text-sm leading-[1.7] text-muted m-0">{s.body}</p>
+                    <div className="font-heading font-bold text-[17px] text-fg mb-1.5 group-hover:text-accent-soft transition-colors duration-300">{s.title}</div>
+                    <p className="font-medium text-sm leading-[1.7] text-muted m-0 group-hover:text-soft-fg transition-colors duration-300">{s.body}</p>
                   </div>
-                </div>
+                </HoverCard>
               </Reveal>
             ))}
           </div>
@@ -103,32 +95,13 @@ export default function DocsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {TXLINE_POINTS.map((p, i) => (
               <Reveal key={p.title} delay={100 + i * 70}>
-                <div className="bg-panel border border-line rounded-2xl p-6 h-full box-border">
-                  <div className="font-heading font-bold text-[15px] text-accent-soft mb-2">{p.title}</div>
-                  <p className="font-medium text-[13px] leading-[1.7] text-muted m-0">{p.body}</p>
-                </div>
+                <HoverCard className="bg-panel border border-line rounded-2xl p-6 h-full box-border transition-all duration-[250ms] hover:-translate-y-[5px] hover:border-btn-border hover:shadow-[0_14px_34px_rgba(47,111,237,0.18)]">
+                  <div className="font-heading font-bold text-[15px] text-accent-soft mb-2 group-hover:text-white transition-colors duration-300">{p.title}</div>
+                  <p className="font-medium text-[13px] leading-[1.7] text-muted m-0 group-hover:text-soft-fg transition-colors duration-300">{p.body}</p>
+                </HoverCard>
               </Reveal>
             ))}
           </div>
-        </div>
-
-        {/* Stack */}
-        <div className="py-14 border-b border-line">
-          <SectionHeading kicker="Under the hood" title="The stack" />
-          <Reveal delay={80}>
-            <div className="bg-panel border border-line rounded-2xl overflow-hidden">
-              {STACK.map((r, i) => (
-                <div
-                  key={r.layer}
-                  className={`grid grid-cols-1 sm:grid-cols-[110px_1fr_1.2fr] gap-1.5 sm:gap-4 px-6 py-4 items-baseline ${i > 0 ? "border-t border-line" : ""}`}
-                >
-                  <div className="font-heading font-bold text-[13px] tracking-[1px] uppercase text-accent">{r.layer}</div>
-                  <div className="font-semibold text-[13px] text-fg">{r.tech}</div>
-                  <div className="font-medium text-[13px] text-muted">{r.role}</div>
-                </div>
-              ))}
-            </div>
-          </Reveal>
         </div>
 
         {/* CTA */}
@@ -139,18 +112,22 @@ export default function DocsPage() {
               Browse the markets, or inspect a settlement proof yourself.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <Link
-                href="/markets"
-                className="inline-block bg-accent !text-white font-heading font-bold text-sm px-6 py-3 rounded-full no-underline hover:bg-accent-soft transition-colors"
-              >
-                Explore Markets
-              </Link>
-              <Link
-                href="/proofs"
-                className="inline-block border border-line-2 !text-soft-fg font-bold text-[13px] px-6 py-3 rounded-full no-underline hover:border-accent hover:!text-white transition-colors"
-              >
-                View Proofs
-              </Link>
+              <Magnetic>
+                <Link
+                  href="/markets"
+                  className="inline-block bg-accent !text-white font-heading font-bold text-sm px-6 py-3 rounded-full no-underline hover:bg-accent-soft transition-colors"
+                >
+                  Explore Markets
+                </Link>
+              </Magnetic>
+              <Magnetic>
+                <Link
+                  href="/proofs"
+                  className="inline-block border border-line-2 !text-soft-fg font-bold text-[13px] px-6 py-3 rounded-full no-underline hover:border-accent hover:!text-white transition-colors"
+                >
+                  View Proofs
+                </Link>
+              </Magnetic>
             </div>
           </Reveal>
         </div>

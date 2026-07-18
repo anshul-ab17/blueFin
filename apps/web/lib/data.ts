@@ -1,5 +1,12 @@
 import type { MatchEvent, Proof } from "@bluefin/types";
 
+// country code → flag emoji; fallback to TeamBadge when a code is missing
+export const FLAGS: Record<string, string> = {
+  ARG: "🇦🇷", FRA: "🇫🇷", BRA: "🇧🇷", GER: "🇩🇪", ENG: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", POR: "🇵🇹",
+  ESP: "🇪🇸", NED: "🇳🇱", USA: "🇺🇸", MEX: "🇲🇽", JPN: "🇯🇵", KOR: "🇰🇷",
+  ITA: "🇮🇹", BEL: "🇧🇪", CRO: "🇭🇷", URU: "🇺🇾", CAN: "🇨🇦", MAR: "🇲🇦",
+};
+
 export const EVENTS: MatchEvent[] = [
   {
     id: "bra-ger",
@@ -10,7 +17,7 @@ export const EVENTS: MatchEvent[] = [
     codeB: "GER",
     colorB: "#2b2b2b",
     status: "upcoming",
-    dateLabel: "July 25, 2026",
+    dateLabel: "Today · Third Place Play-off",
     categories: [
       {
         id: "result",
@@ -55,7 +62,7 @@ export const EVENTS: MatchEvent[] = [
     codeB: "FRA",
     colorB: "#1565c0",
     status: "live",
-    dateLabel: "World Cup 2026 · Semi Final",
+    dateLabel: "World Cup 2026 · Final",
     score: { a: 2, b: 1 },
     timeRemaining: "45:32 · 2nd Half",
     categories: [
@@ -113,38 +120,38 @@ export const TOP_TRADERS = [
 ];
 
 export const SETTLEMENTS = [
-  { event: "France vs Morocco", outcome: "Match Result: France", time: "2h ago" },
-  { event: "Argentina vs Croatia", outcome: "Total Goals: Over 2.5", time: "5h ago" },
-  { event: "Brazil vs Portugal", outcome: "First Scorer: Vinícius Jr.", time: "1d ago" },
+  { event: "Argentina vs England", outcome: "Semi Final: Argentina", time: "3d ago" },
+  { event: "France vs Spain", outcome: "Semi Final: France", time: "4d ago" },
+  { event: "Brazil vs Portugal", outcome: "Quarter Final: Over 2.5", time: "6d ago" },
 ];
 
 export const PROOFS: Proof[] = [
   {
     id: 1,
-    event: "France vs Morocco",
-    market: "Match Result",
-    outcome: "France",
+    event: "Argentina vs England",
+    market: "Semi Final · Match Result",
+    outcome: "Argentina",
     root: "0x7f3a9c2e1b4d8f60a3c5e7d9b1a2f480c891",
     sig: "5xK2pQmnWtRb3vLc8fJhYd7uNq9rT2sZ4mAoP",
-    time: "Jul 10, 2026 · 14:32 UTC",
+    time: "Jul 16, 2026 · 21:47 UTC",
   },
   {
     id: 2,
-    event: "Argentina vs Croatia",
-    market: "Total Goals",
-    outcome: "Over 2.5",
+    event: "France vs Spain",
+    market: "Semi Final · Match Result",
+    outcome: "France",
     root: "0x2b88e1f4c9a03d67e4f1b8a2c5d9e0f3a0d3",
     sig: "8vY7nHqLoWzXt1bE5rCf9mKa2sVd4yQp3nM",
-    time: "Jul 9, 2026 · 19:05 UTC",
+    time: "Jul 15, 2026 · 21:12 UTC",
   },
   {
     id: 3,
     event: "Brazil vs Portugal",
-    market: "First Scorer",
-    outcome: "Vinícius Jr.",
+    market: "Quarter Final · Total Goals",
+    outcome: "Over 2.5",
     root: "0x94c1a7b053d8e2f6a1c4b9d7e0f3a8c6ff22",
     sig: "3mR5tUvXpQd8wLc1nJhF6yBa9zVe2sTo6cN",
-    time: "Jul 8, 2026 · 22:47 UTC",
+    time: "Jul 13, 2026 · 22:47 UTC",
   },
 ];
 
@@ -157,9 +164,8 @@ export const RECENT_TRADES = [
 ];
 
 export const LIVE_NOW = [
-  { id: "arg-fra", title: "ARG vs FRA", flagA: "🇦🇷", flagB: "🇫🇷", codeA: "ARG", colorA: "#3f7dbf", codeB: "FRA", colorB: "#1565c0", score: "2 - 1", clock: "45:32 · 2nd Half" },
-  { id: "bra-ger", title: "BRA vs GER", flagA: "🇧🇷", flagB: "🇩🇪", codeA: "BRA", colorA: "#1c8a3c", codeB: "GER", colorB: "#2b2b2b", score: "1 - 0", clock: "32:11 · 1st Half" },
-  { id: "arg-fra", title: "ENG vs POR", flagA: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", flagB: "🇵🇹", codeA: "ENG", colorA: "#8c2332", codeB: "POR", colorB: "#a01e28", score: "0 - 0", clock: "10:45 · 1st Half" },
+  { id: "arg-fra", title: "ARG vs FRA · FINAL", flagA: "🇦🇷", flagB: "🇫🇷", codeA: "ARG", colorA: "#3f7dbf", codeB: "FRA", colorB: "#1565c0", score: "2 - 1", clock: "45:32 · 2nd Half" },
+  { id: "bra-ger", title: "BRA vs GER · 3RD PLACE", flagA: "🇧🇷", flagB: "🇩🇪", codeA: "BRA", colorA: "#1c8a3c", codeB: "GER", colorB: "#2b2b2b", score: "1 - 0", clock: "32:11 · 1st Half" },
 ];
 
 export const FAQS = [

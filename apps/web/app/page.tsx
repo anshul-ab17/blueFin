@@ -577,12 +577,12 @@ export default function Home() {
           ))}
         </div>
 
-        {/* LIVE NOW */}
+        {/* Recents */}
         <div className="py-14 border-b border-line">
           <Reveal>
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2.5">
-                <h2 className="font-heading font-bold text-[22px] text-fg m-0">Live Now</h2>
+                <h2 className="font-heading font-bold text-[22px] text-fg m-0">Recents</h2>
                 <LiveDot size={8} />
               </div>
               <Link href="/markets" className="text-accent font-bold text-[13px] no-underline hover:text-accent-soft">

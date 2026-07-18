@@ -8,7 +8,7 @@ import TeamBadge from "@/components/team-badge";
 import LiveDot from "@/components/live-dot";
 import PageBackdrop from "@/components/page-backdrop";
 import { FillBar, HoverCard, PageTitle, Reveal } from "@/components/fx";
-import { EVENTS } from "@/lib/data";
+import { EVENTS, FLAGS } from "@/lib/data";
 
 const FILTERS = [
   { id: "all", label: "All" },
@@ -18,6 +18,69 @@ const FILTERS = [
   { id: "nextgoal", label: "Next Goal" },
   { id: "scorer", label: "First Scorer" },
 ];
+
+interface JupEventRow {
+  id: string;
+  title: string;
+  live: boolean;
+  outcomes: { label: string; pct: number; vol: number }[];
+}
+
+function JupiterConsensus() {
+  const { data } = useQuery<JupEventRow[]>({
+    queryKey: ["jupiter-wc"],
+    queryFn: async () => {
+      const res = await fetch("/api/jupiter");
+      if (!res.ok) throw new Error("jupiter unavailable");
+      return res.json();
+    },
+    staleTime: 60_000,
+    retry: 1,
+  });
+
+  if (!data?.length) return null;
+
+  return (
+    <div className="mt-12">
+      <Reveal>
+        <div className="flex items-baseline gap-3 mb-1.5">
+          <h2 className="font-heading font-bold text-[22px] m-0 text-fg">Live World Cup Consensus</h2>
+          <span className="font-bold text-[11px] tracking-[1px] text-dim uppercase">via Jupiter · display only</span>
+        </div>
+        <p className="font-medium text-[13px] text-dim m-0 mb-5">
+          Real-time implied probabilities from Jupiter prediction markets. TxLINE remains Bluefin&apos;s primary
+          data source and the source of truth for every settlement.
+        </p>
+      </Reveal>
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] gap-4">
+        {data.slice(0, 6).map((ev, i) => (
+          <Reveal key={ev.id} delay={(i % 6) * 60}>
+            <HoverCard className="bg-panel border border-line rounded-[14px] p-5 transition-all duration-[250ms] hover:-translate-y-[5px] hover:border-btn-border hover:shadow-[0_14px_34px_rgba(47,111,237,0.18)]">
+              <div className="flex items-center justify-between mb-3.5">
+                <div className="font-bold text-[14px] text-fg group-hover:text-accent-soft transition-colors duration-300">{ev.title}</div>
+                {ev.live && (
+                  <span className="flex items-center gap-1.5">
+                    <LiveDot />
+                    <span className="font-heading font-bold text-[10px] text-live tracking-[1px]">LIVE</span>
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                {ev.outcomes.map((o) => (
+                  <div key={o.label} className="flex items-center gap-2.5">
+                    <span className="font-semibold text-[12px] text-muted w-[88px] shrink-0 truncate">{o.label}</span>
+                    <FillBar pct={o.pct} />
+                    <span className="font-heading font-bold text-xs text-accent-soft min-w-9 text-right">{o.pct}%</span>
+                  </div>
+                ))}
+              </div>
+            </HoverCard>
+          </Reveal>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function MarketsPage() {
   const [filter, setFilter] = useState("all");
@@ -72,11 +135,11 @@ export default function MarketsPage() {
             <HoverCard className="bg-panel border border-line rounded-[14px] p-[22px] transition-all duration-[250ms] hover:-translate-y-[5px] hover:border-btn-border hover:shadow-[0_14px_34px_rgba(47,111,237,0.18)]">
               <Link href={`/trade/${ev.id}?category=${cat.id}`} className="absolute inset-0 z-[2] rounded-[14px]" aria-label={cat.question} />
               <div className="flex items-center gap-2 font-bold text-[15px] text-fg group-hover:text-white transition-colors duration-300">
-                <TeamBadge code={ev.codeA} color={ev.colorA} size="sm" />
+                {FLAGS[ev.codeA] ? <span className="text-lg leading-none">{FLAGS[ev.codeA]}</span> : <TeamBadge code={ev.codeA} color={ev.colorA} size="sm" />}
                 <span>{ev.teamA}</span>
                 <span className="text-dim group-hover:text-muted transition-colors duration-300">vs</span>
                 <span>{ev.teamB}</span>
-                <TeamBadge code={ev.codeB} color={ev.colorB} size="sm" />
+                {FLAGS[ev.codeB] ? <span className="text-lg leading-none">{FLAGS[ev.codeB]}</span> : <TeamBadge code={ev.codeB} color={ev.colorB} size="sm" />}
               </div>
               {ev.status === "live" ? (
                 <div className="flex items-center gap-1.5">
@@ -115,6 +178,7 @@ export default function MarketsPage() {
           </Reveal>
         ))}
       </div>
+      <JupiterConsensus />
     </div>
   );
 }
