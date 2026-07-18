@@ -1,13 +1,32 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import PageBackdrop from "@/components/page-backdrop";
 import StatBox from "@/components/stat-box";
 import { CountUp, PageTitle, Reveal } from "@/components/fx";
 import { PROOFS } from "@/lib/data";
+import type { Proof } from "@bluefin/types";
+
+const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ProofsPage() {
   const [expanded, setExpanded] = useState<number | null>(null);
+
+  const { data: proofs = PROOFS } = useQuery<Proof[]>({
+    queryKey: ["proofs"],
+    queryFn: async () => {
+      const res = await fetch(`${API}/api/proofs`);
+      if (!res.ok) throw new Error("proofs unavailable");
+      return res.json();
+    },
+    initialData: PROOFS,
+    enabled: !!API,
+    staleTime: 30_000,
+    retry: 1,
+  });
+
+  const liveBackend = !!API && proofs !== PROOFS;
 
   return (
     <div className="max-w-[1000px] mx-auto px-5 md:px-10 pt-12 pb-20">
@@ -18,17 +37,25 @@ export default function ProofsPage() {
       />
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-7">
         <Reveal>
-          <StatBox label="Proofs Anchored" value={<CountUp value={1284} />} />
+          <StatBox label="Proofs Anchored" value={<CountUp value={proofs.length} />} />
         </Reveal>
         <Reveal delay={80}>
-          <StatBox label="Settlement Accuracy" value={<CountUp value={98.7} decimals={1} suffix="%" />} valueClass="text-win" />
+          <StatBox
+            label="Settlement Accuracy"
+            value={liveBackend ? "—" : <CountUp value={98.7} decimals={1} suffix="%" />}
+            valueClass={liveBackend ? "text-dim" : "text-win"}
+          />
         </Reveal>
         <Reveal delay={160}>
-          <StatBox label="Avg Settlement Time" value={<CountUp value={0.4} decimals={1} suffix="s" />} valueClass="text-accent" />
+          <StatBox
+            label="Avg Settlement Time"
+            value={liveBackend ? "—" : <CountUp value={0.4} decimals={1} suffix="s" />}
+            valueClass={liveBackend ? "text-dim" : "text-accent"}
+          />
         </Reveal>
       </div>
       <div className="flex flex-col gap-3.5">
-        {PROOFS.map((p, i) => (
+        {proofs.map((p, i) => (
           <Reveal key={p.id} delay={i * 80}>
             <div className="bg-panel border border-line rounded-[14px] overflow-hidden transition-all duration-[250ms] hover:-translate-y-[3px] hover:border-btn-border">
               <button
