@@ -28,7 +28,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ConnectionProvider endpoint={clusterApiUrl("devnet")}>
-        <WalletProvider wallets={wallets}>
+        {/* onError: user closing the wallet popup is not an app error; the modal
+            already shows a toast for it, so keep it out of the console */}
+        <WalletProvider wallets={wallets} autoConnect onError={() => {}}>
           <WalletSync>{children}</WalletSync>
         </WalletProvider>
       </ConnectionProvider>

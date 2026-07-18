@@ -190,11 +190,4 @@ export const FAQS = [
   },
 ];
 
-export const WALLET_OPTIONS = [
-  { name: "Phantom", icon: "👻" },
-  { name: "MetaMask", icon: "🦊" },
-  { name: "Backpack", icon: "🎒" },
-  { name: "Coinbase Wallet", icon: "🔵" },
-];
-
 export const WALLET_BALANCE = "1,250 USDC";
