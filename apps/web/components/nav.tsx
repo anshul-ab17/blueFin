@@ -100,9 +100,9 @@ export default function Nav() {
                 <span className="block font-semibold text-[11px] text-dim">{walletAddress}</span>
               </span>
               <span className="w-[34px] h-[34px] rounded-full bg-[#16283b] border border-btn-border flex items-center justify-center">
-                <svg width="16" height="20" viewBox="0 0 22 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M11 6V26" stroke="#4d9fff" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M4 2C4 6 6 9 11 9C16 9 18 6 18 2" stroke="#4d9fff" strokeWidth="2" strokeLinecap="round" />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="8" r="4" stroke="#4d9fff" strokeWidth="2" />
+                  <path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" stroke="#4d9fff" strokeWidth="2" strokeLinecap="round" />
                 </svg>
               </span>
             </button>
