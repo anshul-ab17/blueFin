@@ -23,6 +23,13 @@ function totalVolume(event: MatchEvent) {
   return n >= 1e6 ? `$${(n / 1e6).toFixed(1)}M` : `$${Math.round(n / 1e3)}K`;
 }
 
+interface JupEventRow {
+  id: string;
+  title: string;
+  live: boolean;
+  outcomes: { label: string; pct: number; vol: number }[];
+}
+
 export default function TradeView({
   event: staticEvent,
   initialCategoryId,
@@ -40,15 +47,67 @@ export default function TradeView({
     },
     refetchInterval: 10_000,
   });
+
+  const { data: jupEvents } = useQuery<JupEventRow[]>({
+    queryKey: ["jupiter-wc"],
+    queryFn: async () => {
+      const res = await fetch("/api/jupiter");
+      if (!res.ok) throw new Error("failed to load jupiter events");
+      return res.json();
+    },
+    enabled: staticEvent.id === "esp-arg",
+    refetchInterval: 60_000,
+  });
+
+  const jupCategories = (jupEvents ?? []).map((je) => {
+    return {
+      id: je.id,
+      label: je.title.replace("World Cup: ", "").replace("World Cup Finals: ", "").replace("FIFA World Cup: ", ""),
+      question: je.title,
+      vol: je.outcomes.reduce((acc, o) => acc + o.vol, 0) >= 1000 
+        ? `$${Math.round(je.outcomes.reduce((acc, o) => acc + o.vol, 0) / 1000)}K` 
+        : `$${je.outcomes.reduce((acc, o) => acc + o.vol, 0)}`,
+      outcomes: je.outcomes.map((o) => {
+        const p = Math.min(Math.max(o.pct, 1), 99) / 100;
+        const yesOdds = Math.round((1 / p) * 100) / 100;
+        const noOdds = Math.round((1 / (1 - p)) * 100) / 100;
+        const result = je.live === false && staticEvent.status === "finished"
+          ? (o.pct >= 95 ? ("YES" as const) : o.pct <= 5 ? ("NO" as const) : undefined)
+          : undefined;
+
+        return {
+          label: o.label,
+          pct: o.pct,
+          yesOdds,
+          noOdds,
+          ...(result ? { result } : {})
+        };
+      })
+    };
+  });
+
   const liveMatch = liveEvents?.find((x) => x.id === staticEvent.id);
-  const event = liveMatch
-    ? {
-        ...staticEvent,
-        categories: staticEvent.categories.map(
-          (c) => liveMatch.categories.find((lc) => lc.id === c.id) ?? c
-        ),
-      }
-    : staticEvent;
+  const event = (() => {
+    const baseEvent = liveMatch
+      ? {
+          ...staticEvent,
+          categories: staticEvent.categories.map(
+            (c) => liveMatch.categories.find((lc) => lc.id === c.id) ?? c
+          ),
+        }
+      : staticEvent;
+
+    if (staticEvent.id === "esp-arg" && jupCategories && jupCategories.length > 0) {
+      return {
+        ...baseEvent,
+        categories: [
+          ...baseEvent.categories,
+          ...jupCategories
+        ]
+      };
+    }
+    return baseEvent;
+  })();
 
   const initialCategory =
     event.categories.find((c) => c.id === initialCategoryId) ?? event.categories[0];
