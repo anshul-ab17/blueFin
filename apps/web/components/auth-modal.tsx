@@ -60,15 +60,20 @@ export default function AuthModal() {
   // connect event fires before the provider subscribes and the UI never updates
   useEffect(() => {
     if (!pending || wallet?.adapter.name !== pending) return;
-    setPending(null);
-    if (wallet.adapter.connected || wallet.adapter.connecting) return;
-    connect().catch(() => {
-      // autoConnect may have raced us and already own the session —
-      // only surface the toast on a real rejection
-      if (!wallet.adapter.connected && !wallet.adapter.connecting) {
-        flashToast("Wallet connection cancelled");
-      }
-    });
+    
+    // Use a small delay so that autoConnect has time to run and set the connecting state,
+    // avoiding duplicate parallel connection calls which cause instant cancellations.
+    const timer = setTimeout(() => {
+      setPending(null);
+      if (wallet.adapter.connected || wallet.adapter.connecting) return;
+      connect().catch(() => {
+        if (!wallet.adapter.connected && !wallet.adapter.connecting) {
+          flashToast("Wallet connection cancelled");
+        }
+      });
+    }, 150);
+
+    return () => clearTimeout(timer);
   }, [pending, wallet, connect, flashToast]);
 
   if (!authOpen) return null;
