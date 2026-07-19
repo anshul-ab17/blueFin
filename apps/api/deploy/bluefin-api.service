@@ -1,0 +1,29 @@
+[Unit]
+Description=Bluefin API (Axum + SQLite)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=bluefin
+Group=bluefin
+WorkingDirectory=/opt/bluefin-api
+EnvironmentFile=/opt/bluefin-api/.env
+ExecStart=/opt/bluefin-api/bluefin-api
+Restart=on-failure
+RestartSec=3
+
+# Settlement shells out to `bun scripts/settle.ts`; make sure bun is on PATH.
+Environment=PATH=/home/bluefin/.bun/bin:/usr/local/bin:/usr/bin:/bin
+
+# Light hardening. NOTE: ProtectHome/ProtectSystem=strict are intentionally NOT
+# set — the settlement worker runs bun from /home/bluefin/src (baked build path),
+# which those would block.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectControlGroups=true
+ProtectKernelTunables=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target

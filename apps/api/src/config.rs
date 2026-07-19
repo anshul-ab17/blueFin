@@ -11,7 +11,9 @@ impl Config {
     pub fn from_env() -> anyhow::Result<Self> {
         dotenvy::dotenv().ok();
         Ok(Self {
-            bind_addr: std::env::var("BIND_ADDR").unwrap_or_else(|_| "0.0.0.0:8787".into()),
+            // Bind loopback by default so the plaintext port is never publicly reachable;
+            // TLS is terminated by nginx + certbot in front (see infra/nginx/bluefin-api.conf).
+            bind_addr: std::env::var("BIND_ADDR").unwrap_or_else(|_| "127.0.0.1:8787".into()),
             database_url: std::env::var("DATABASE_URL")
                 .unwrap_or_else(|_| "sqlite://bluefin.db?mode=rwc".into()),
             txline_base_url: std::env::var("TXLINE_BASE_URL")

@@ -1,14 +1,53 @@
-use axum::extract::{Path, State};
+use axum::extract::{Path, Request, State};
 use axum::http::StatusCode;
+use axum::middleware::Next;
 use axum::response::sse::{Event, Sse};
-use axum::response::IntoResponse;
+use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde_json::{json, Value};
+use std::collections::HashMap;
 use std::convert::Infallible;
+use std::sync::Mutex;
+use std::time::{Duration, Instant};
 
 use crate::db::{self, MarketRow, OutcomeRow};
 use crate::state::AppState;
+
+// ── Per-IP fixed-window rate limit ───────────────────────────────────────────
+// Defense-in-depth behind Cloudflare (the primary edge limiter). Keyed on the
+// proxy-supplied client IP; direct/local requests (no proxy header) are not limited.
+const RL_WINDOW: Duration = Duration::from_secs(10);
+const RL_MAX: u32 = 100;
+// ponytail: global lock + O(n) sweep per request; fine at this scale, shard by IP if it ever bites.
+static RATE: Mutex<Option<HashMap<String, (u32, Instant)>>> = Mutex::new(None);
+
+fn rl_allow(map: &mut HashMap<String, (u32, Instant)>, ip: String, now: Instant) -> bool {
+    map.retain(|_, (_, start)| now.duration_since(*start) < RL_WINDOW);
+    let e = map.entry(ip).or_insert((0, now));
+    if now.duration_since(e.1) >= RL_WINDOW {
+        *e = (0, now);
+    }
+    e.0 += 1;
+    e.0 <= RL_MAX
+}
+
+async fn rate_limit(req: Request, next: Next) -> Result<Response, StatusCode> {
+    let ip = req
+        .headers()
+        .get("x-forwarded-for")
+        .and_then(|v| v.to_str().ok())
+        .and_then(|s| s.split(',').next())
+        .map(|s| s.trim().to_string());
+    if let Some(ip) = ip {
+        let mut guard = RATE.lock().unwrap_or_else(|p| p.into_inner());
+        let map = guard.get_or_insert_with(HashMap::new);
+        if !rl_allow(map, ip, Instant::now()) {
+            return Err(StatusCode::TOO_MANY_REQUESTS);
+        }
+    }
+    Ok(next.run(req).await)
+}
 
 pub fn router(state: AppState) -> Router {
     Router::new()
@@ -23,6 +62,7 @@ pub fn router(state: AppState) -> Router {
         .route("/api/trades", post(crate::trades::post_trade))
         .route("/api/positions/{wallet}", get(crate::trades::positions))
         .route("/api/stream", get(stream))
+        .layer(axum::middleware::from_fn(rate_limit))
         .layer(cors())
         .with_state(state)
 }
@@ -403,4 +443,25 @@ fn internal<E: std::fmt::Debug>(e: E) -> StatusCode {
 
 fn internal_resp() -> (StatusCode, Json<Value>) {
     (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({ "error": "internal" })))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rate_limit_blocks_after_max_then_resets_next_window() {
+        let mut map = HashMap::new();
+        let t0 = Instant::now();
+        for _ in 0..RL_MAX {
+            assert!(rl_allow(&mut map, "1.2.3.4".into(), t0));
+        }
+        // one past the cap in the same window is rejected
+        assert!(!rl_allow(&mut map, "1.2.3.4".into(), t0));
+        // a different IP is unaffected
+        assert!(rl_allow(&mut map, "9.9.9.9".into(), t0));
+        // next window resets the count
+        let t1 = t0 + RL_WINDOW + Duration::from_millis(1);
+        assert!(rl_allow(&mut map, "1.2.3.4".into(), t1));
+    }
 }
