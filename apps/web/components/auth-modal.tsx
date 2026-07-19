@@ -61,11 +61,13 @@ export default function AuthModal() {
   useEffect(() => {
     if (!pending || wallet?.adapter.name !== pending) return;
     setPending(null);
-    if (wallet.adapter.connected) return;
+    if (wallet.adapter.connected || wallet.adapter.connecting) return;
     connect().catch(() => {
       // autoConnect may have raced us and already own the session —
       // only surface the toast on a real rejection
-      if (!wallet.adapter.connected) flashToast("Wallet connection cancelled");
+      if (!wallet.adapter.connected && !wallet.adapter.connecting) {
+        flashToast("Wallet connection cancelled");
+      }
     });
   }, [pending, wallet, connect, flashToast]);
 
