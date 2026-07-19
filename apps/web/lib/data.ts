@@ -204,12 +204,14 @@ export const PROOFS: Proof[] = [
   },
 ];
 
+// settled trades from the finished bracket (see R16/QF/SF above) — matches real results
 export const RECENT_TRADES = [
-  { side: "YES" as const, label: "Argentina · Match Result", amount: "$450", time: "8s ago" },
-  { side: "NO" as const, label: "Spain · Match Result", amount: "$180", time: "34s ago" },
-  { side: "YES" as const, label: "Over 2.5 · Total Goals", amount: "$800", time: "1m ago" },
-  { side: "YES" as const, label: "Yamal · First Scorer", amount: "$95", time: "2m ago" },
-  { side: "NO" as const, label: "Draw · Match Result", amount: "$210", time: "3m ago" },
+  { side: "YES" as const, label: "Spain · Semi-Final vs FRA", amount: "$450", time: "Jul 15" },
+  { side: "YES" as const, label: "Argentina · Semi-Final vs ENG", amount: "$620", time: "Jul 16" },
+  { side: "NO" as const, label: "Portugal · Quarter-Final vs FRA", amount: "$180", time: "Jul 11" },
+  { side: "YES" as const, label: "Over 2.5 · ARG vs BEL", amount: "$800", time: "Jul 12" },
+  { side: "YES" as const, label: "Belgium · R16 vs USA", amount: "$95", time: "Jul 7" },
+  { side: "NO" as const, label: "Draw · ESP vs GER", amount: "$210", time: "Jul 11" },
 ];
 
 export const LIVE_NOW = [
