@@ -30,6 +30,49 @@ function fmtTime(ts: number): string {
   return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 }
 
+/** Deterministic PRNG (mulberry32) seeded from a string, so synthetic charts are stable. */
+function seededRand(seed: string): () => number {
+  let h = 1779033703 ^ seed.length;
+  for (let i = 0; i < seed.length; i++) {
+    h = Math.imul(h ^ seed.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  let a = h >>> 0;
+  return () => {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
+ * Build a plausible odds-history that starts near an even split and converges to the
+ * settled result — mirrors how a real market resolves (winner → ~100%). Purely for
+ * finished matches when no backend history exists.
+ */
+function syntheticHistory(marketId: string, category: string, labels: string[], finalPcts: number[]): ChartData {
+  const rand = seededRand(`${marketId}:${category}`);
+  const N = 40;
+  const nowSec = Math.floor(Date.now() / 1000);
+  const spanSec = 3 * 3600; // ~kickoff to full-time window
+  const start = labels.map(() => 100 / labels.length);
+  const series: Point[] = [];
+  for (let i = 0; i < N; i++) {
+    const t = i / (N - 1);
+    const ease = t * t * (3 - 2 * t); // smoothstep
+    const raw = labels.map((_, li) => {
+      const base = start[li] + (finalPcts[li] - start[li]) * ease;
+      const noise = i === N - 1 ? 0 : (rand() - 0.5) * 10 * (1 - ease);
+      return Math.max(0.1, base + noise);
+    });
+    const sum = raw.reduce((s, v) => s + v, 0);
+    const values = i === N - 1 ? finalPcts.slice() : raw.map((v) => (v / sum) * 100);
+    series.push({ ts: nowSec - spanSec + Math.round(t * spanSec), values });
+  }
+  return { marketId, category, labels, series };
+}
+
 function SvgChart({ data, width, height }: { data: ChartData; width: number; height: number }) {
   const [hover, setHover] = useState<{ x: number; idx: number } | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -200,10 +243,14 @@ export default function OddsChart({
   marketId,
   category,
   labels: fallbackLabels,
+  finished = false,
+  finalPcts,
 }: {
   marketId: string;
   category: string;
   labels: string[];
+  finished?: boolean;
+  finalPcts?: number[];
 }) {
   const [window, setWindow] = useState<Window>("ALL");
   const [data, setData] = useState<ChartData | null>(null);
@@ -230,7 +277,13 @@ export default function OddsChart({
       .finally(() => setLoading(false));
   }, [marketId, category, window]);
 
-  const isEmpty = !data || !data.series.length;
+  // Finished match with no backend history → show a synthetic converge-to-result chart.
+  const synthetic =
+    finished && finalPcts && (!data || !data.series.length)
+      ? syntheticHistory(marketId, category, fallbackLabels, finalPcts)
+      : null;
+  const chart = data && data.series.length ? data : synthetic;
+  const isEmpty = !chart || !chart.series.length;
 
   return (
     <div ref={containerRef} className="bg-panel border border-line rounded-[14px] p-5 mb-5">
@@ -284,7 +337,7 @@ export default function OddsChart({
           </span>
         </div>
       ) : (
-        <SvgChart data={data!} width={width} height={240} />
+        <SvgChart data={chart!} width={width} height={240} />
       )}
     </div>
   );
