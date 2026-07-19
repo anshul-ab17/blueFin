@@ -1,112 +1,165 @@
-import type { MatchEvent, Proof } from "@bluefin/types";
+import type { BracketRound, MatchEvent, Outcome, Proof } from "@bluefin/types";
 
 // kept for any legacy emoji fallback references; real flag rendering uses FlagIcon component
 export const FLAGS: Record<string, string> = {};
 
-export const EVENTS: MatchEvent[] = [
-  {
-    id: "bra-ger",
-    teamA: "Brazil",
-    teamB: "Germany",
-    codeA: "BRA",
-    colorA: "#1c8a3c",
-    codeB: "GER",
-    colorB: "#2b2b2b",
-    status: "upcoming",
-    dateLabel: "Today · Third Place Play-off",
+const COLORS: Record<string, string> = {
+  ESP: "#c60b1e", ARG: "#3f7dbf", BRA: "#1c8a3c", GER: "#2b2b2b",
+  FRA: "#002395", ENG: "#c60b1e", POR: "#b5091c", NED: "#ff6600",
+  MAR: "#006233", MEX: "#006847", BEL: "#111111", USA: "#1f2f6b",
+  URU: "#5cb8e6", ITA: "#0064aa", JPN: "#bc002d", CRO: "#1c56a6",
+};
+
+type TeamTuple = [name: string, code: string];
+
+/** odds from an implied probability (with a light margin) */
+function oddsFrom(pct: number): { yesOdds: number; noOdds: number } {
+  const p = Math.min(Math.max(pct, 1), 99) / 100;
+  return {
+    yesOdds: Math.round((1 / p) * 100) / 100,
+    noOdds: Math.round((1 / (1 - p)) * 100) / 100,
+  };
+}
+
+function outcome(label: string, pct: number, result?: "YES" | "NO"): Outcome {
+  return { label, pct, ...oddsFrom(pct), ...(result ? { result } : {}) };
+}
+
+/** Build a settled knockout fixture with a resolved Match Result market. */
+function finished(
+  id: string,
+  round: BracketRound,
+  venue: string,
+  dateLabel: string,
+  a: TeamTuple,
+  b: TeamTuple,
+  scoreA: number,
+  scoreB: number,
+  vol: string
+): MatchEvent {
+  const winner: "A" | "B" | "draw" = scoreA > scoreB ? "A" : scoreB > scoreA ? "B" : "draw";
+  // settled market: winner near-certain, remainder split
+  const pctA = winner === "A" ? 96 : winner === "B" ? 3 : 48;
+  const pctB = winner === "B" ? 96 : winner === "A" ? 3 : 48;
+  const pctD = winner === "draw" ? 96 : 1;
+  return {
+    id,
+    round,
+    venue,
+    teamA: a[0], codeA: a[1], colorA: COLORS[a[1]] ?? "#2f6fa8",
+    teamB: b[0], codeB: b[1], colorB: COLORS[b[1]] ?? "#2f6fa8",
+    status: "finished",
+    winner,
+    score: { a: scoreA, b: scoreB },
+    dateLabel,
     categories: [
       {
         id: "result",
         label: "Match Result",
-        question: "Full-time result: Brazil vs Germany",
-        vol: "$412K",
+        question: `Full-time result: ${a[0]} vs ${b[0]}`,
+        vol,
         outcomes: [
-          { label: "Brazil", pct: 48, yesOdds: 2.08, noOdds: 1.92 },
-          { label: "Germany", pct: 33, yesOdds: 3.03, noOdds: 1.44 },
-          { label: "Draw", pct: 19, yesOdds: 5.26, noOdds: 1.23 },
-        ],
-      },
-      {
-        id: "totalgoals",
-        label: "Total Goals",
-        question: "Total Goals: BRA vs GER over/under 2.5",
-        vol: "$225K",
-        outcomes: [
-          { label: "Over 2.5", pct: 57, yesOdds: 1.75, noOdds: 2.15 },
-          { label: "Under 2.5", pct: 43, yesOdds: 2.32, noOdds: 1.62 },
-        ],
-      },
-      {
-        id: "scorer",
-        label: "First Scorer",
-        question: "Who scores first?",
-        vol: "$115K",
-        outcomes: [
-          { label: "Vinícius Jr.", pct: 19, yesOdds: 5.25, noOdds: 1.19 },
-          { label: "Rodrygo", pct: 14, yesOdds: 7.1, noOdds: 1.12 },
-          { label: "Other", pct: 67, yesOdds: 1.35, noOdds: 2.85 },
+          outcome(a[0], pctA, winner === "A" ? "YES" : "NO"),
+          outcome(b[0], pctB, winner === "B" ? "YES" : "NO"),
+          outcome("Draw", pctD, winner === "draw" ? "YES" : "NO"),
         ],
       },
     ],
-  },
-  {
-    id: "esp-arg",
-    teamA: "Spain",
-    teamB: "Argentina",
-    codeA: "ESP",
-    colorA: "#c60b1e",
-    codeB: "ARG",
-    colorB: "#3f7dbf",
-    status: "live",
-    dateLabel: "World Cup 2026 · Final",
-    score: { a: 1, b: 1 },
-    timeRemaining: "67:14 · 2nd Half",
-    categories: [
-      {
-        id: "result",
-        label: "Match Result",
-        question: "Full-time result: Spain vs Argentina",
-        vol: "$1.42M",
-        outcomes: [
-          { label: "Argentina", pct: 52, yesOdds: 1.92, noOdds: 2.05 },
-          { label: "Spain", pct: 38, yesOdds: 2.65, noOdds: 1.52 },
-          { label: "Draw", pct: 10, yesOdds: 6.8, noOdds: 1.12 },
-        ],
-      },
-      {
-        id: "totalgoals",
-        label: "Total Goals",
-        question: "Total Goals: ESP vs ARG over/under 2.5",
-        vol: "$610K",
-        outcomes: [
-          { label: "Over 2.5", pct: 61, yesOdds: 1.65, noOdds: 2.2 },
-          { label: "Under 2.5", pct: 39, yesOdds: 2.55, noOdds: 1.45 },
-        ],
-      },
-      {
-        id: "nextgoal",
-        label: "Next Goal",
-        question: "Who scores next?",
-        vol: "$340K",
-        outcomes: [
-          { label: "Argentina", pct: 48, yesOdds: 2.05, noOdds: 1.95 },
-          { label: "Spain", pct: 38, yesOdds: 2.6, noOdds: 1.5 },
-          { label: "No More Goals", pct: 14, yesOdds: 6.2, noOdds: 1.1 },
-        ],
-      },
-      {
-        id: "scorer",
-        label: "First Scorer",
-        question: "Will Lamine Yamal score anytime?",
-        vol: "$580K",
-        outcomes: [
-          { label: "Lamine Yamal", pct: 44, yesOdds: 2.25, noOdds: 1.78 },
-          { label: "Other / None", pct: 56, yesOdds: 1.78, noOdds: 2.15 },
-        ],
-      },
-    ],
-  },
+  };
+}
+
+// ── World Cup 2026 knockout bracket ──────────────────────────────────────────
+// Coherent path: Spain & Argentina reach the Final; France & England play for 3rd.
+const R16: MatchEvent[] = [
+  finished("esp-ned", "R16", "Los Angeles", "Round of 16 · Jul 5", ["Spain", "ESP"], ["Netherlands", "NED"], 3, 0, "$820K"),
+  finished("ger-cro", "R16", "Dallas", "Round of 16 · Jul 5", ["Germany", "GER"], ["Croatia", "CRO"], 2, 1, "$540K"),
+  finished("fra-bra", "R16", "New York/New Jersey", "Round of 16 · Jul 6", ["France", "FRA"], ["Brazil", "BRA"], 2, 1, "$1.1M"),
+  finished("por-mar", "R16", "Miami", "Round of 16 · Jul 6", ["Portugal", "POR"], ["Morocco", "MAR"], 1, 0, "$470K"),
+  finished("arg-mex", "R16", "Mexico City", "Round of 16 · Jul 7", ["Argentina", "ARG"], ["Mexico", "MEX"], 2, 0, "$960K"),
+  finished("bel-usa", "R16", "Atlanta", "Round of 16 · Jul 7", ["Belgium", "BEL"], ["United States", "USA"], 4, 1, "$47.75M"),
+  finished("eng-uru", "R16", "Houston", "Round of 16 · Jul 8", ["England", "ENG"], ["Uruguay", "URU"], 2, 1, "$610K"),
+  finished("ita-jpn", "R16", "Seattle", "Round of 16 · Jul 8", ["Italy", "ITA"], ["Japan", "JPN"], 1, 0, "$430K"),
 ];
+
+const QF: MatchEvent[] = [
+  finished("esp-ger", "QF", "Los Angeles", "Quarter-Final · Jul 11", ["Spain", "ESP"], ["Germany", "GER"], 2, 0, "$1.3M"),
+  finished("fra-por", "QF", "Kansas City", "Quarter-Final · Jul 11", ["France", "FRA"], ["Portugal", "POR"], 2, 1, "$980K"),
+  finished("arg-bel", "QF", "Miami", "Quarter-Final · Jul 12", ["Argentina", "ARG"], ["Belgium", "BEL"], 3, 1, "$1.5M"),
+  finished("eng-ita", "QF", "Boston", "Quarter-Final · Jul 12", ["England", "ENG"], ["Italy", "ITA"], 2, 0, "$870K"),
+];
+
+const SF: MatchEvent[] = [
+  finished("esp-fra", "SF", "Dallas", "Semi-Final · Jul 15", ["Spain", "ESP"], ["France", "FRA"], 2, 1, "$2.4M"),
+  finished("arg-eng", "SF", "Atlanta", "Semi-Final · Jul 16", ["Argentina", "ARG"], ["England", "ENG"], 1, 0, "$2.1M"),
+];
+
+const THIRD: MatchEvent = {
+  id: "fra-eng",
+  round: "3rd",
+  venue: "Miami",
+  teamA: "France", codeA: "FRA", colorA: COLORS.FRA,
+  teamB: "England", codeB: "ENG", colorB: COLORS.ENG,
+  status: "upcoming",
+  dateLabel: "World Cup 2026 · Third Place Play-off",
+  categories: [
+    {
+      id: "result",
+      label: "Match Result",
+      question: "Full-time result: France vs England",
+      vol: "$412K",
+      outcomes: [outcome("France", 46), outcome("England", 34), outcome("Draw", 20)],
+    },
+    {
+      id: "totalgoals",
+      label: "Total Goals",
+      question: "Total Goals: FRA vs ENG over/under 2.5",
+      vol: "$180K",
+      outcomes: [outcome("Over 2.5", 55), outcome("Under 2.5", 45)],
+    },
+  ],
+};
+
+const FINAL: MatchEvent = {
+  id: "esp-arg",
+  round: "Final",
+  venue: "New York/New Jersey",
+  teamA: "Spain", codeA: "ESP", colorA: COLORS.ESP,
+  teamB: "Argentina", codeB: "ARG", colorB: COLORS.ARG,
+  status: "upcoming",
+  dateLabel: "World Cup 2026 · Final",
+  categories: [
+    {
+      id: "result",
+      label: "Match Result",
+      question: "Full-time result: Spain vs Argentina",
+      vol: "$1.42M",
+      outcomes: [outcome("Argentina", 52), outcome("Spain", 38), outcome("Draw", 10)],
+    },
+    {
+      id: "totalgoals",
+      label: "Total Goals",
+      question: "Total Goals: ESP vs ARG over/under 2.5",
+      vol: "$610K",
+      outcomes: [outcome("Over 2.5", 61), outcome("Under 2.5", 39)],
+    },
+    {
+      id: "nextgoal",
+      label: "Next Goal",
+      question: "Who scores next?",
+      vol: "$340K",
+      outcomes: [outcome("Argentina", 48), outcome("Spain", 38), outcome("No More Goals", 14)],
+    },
+    {
+      id: "scorer",
+      label: "First Scorer",
+      question: "Will Lamine Yamal score anytime?",
+      vol: "$580K",
+      outcomes: [outcome("Lamine Yamal", 44), outcome("Other / None", 56)],
+    },
+  ],
+};
+
+export const EVENTS: MatchEvent[] = [FINAL, THIRD, ...SF, ...QF, ...R16];
 
 export const TOP_TRADERS = [
   { rank: 1, name: "DeepBlue", volume: "$1.25M", change: "+24.6%" },
@@ -160,8 +213,8 @@ export const RECENT_TRADES = [
 ];
 
 export const LIVE_NOW = [
-  { id: "esp-arg", title: "ESP vs ARG · FINAL", flagA: "🇪🇸", flagB: "🇦🇷", codeA: "ESP", colorA: "#c60b1e", codeB: "ARG", colorB: "#3f7dbf", score: "1 - 1", clock: "67:14 · 2nd Half" },
-  { id: "bra-ger", title: "BRA vs GER · 3RD PLACE", flagA: "🇧🇷", flagB: "🇩🇪", codeA: "BRA", colorA: "#1c8a3c", codeB: "GER", colorB: "#2b2b2b", score: "1 - 0", clock: "32:11 · 1st Half" },
+  { id: "esp-arg", title: "ESP vs ARG · FINAL", flagA: "🇪🇸", flagB: "🇦🇷", codeA: "ESP", colorA: "#c60b1e", codeB: "ARG", colorB: "#3f7dbf" },
+  { id: "fra-eng", title: "FRA vs ENG · 3RD PLACE", flagA: "🇫🇷", flagB: "🏴", codeA: "FRA", colorA: "#002395", codeB: "ENG", colorB: "#c60b1e" },
 ];
 
 export const FAQS = [
