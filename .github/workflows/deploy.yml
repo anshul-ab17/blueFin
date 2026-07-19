@@ -1,0 +1,59 @@
+name: Deploy Backend to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/api/**'
+      - 'packages/types/**'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  deploy:
+    name: Build & Deploy Rust API
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 13.207.139.82 >> ~/.ssh/known_hosts
+
+      - name: Compress and SCP Source Code
+        run: |
+          tar -czf /tmp/bluefin-api-src.tar.gz -C apps/api .
+          scp -i ~/.ssh/id_rsa /tmp/bluefin-api-src.tar.gz ubuntu@13.207.139.82:/tmp/bluefin-api-src.tar.gz
+
+      - name: Remote Build and Restart Service
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@13.207.139.82 << 'EOF'
+            set -eu
+            
+            # Setup folders
+            sudo mkdir -p /home/bluefin/src
+            sudo chown -R ubuntu:ubuntu /home/bluefin/src
+            
+            # Extract fresh source
+            rm -rf /home/bluefin/src/*
+            tar -xzf /tmp/bluefin-api-src.tar.gz -C /home/bluefin/src
+            rm -f /tmp/bluefin-api-src.tar.gz
+            
+            # Build binary remotely
+            source /home/bluefin/.cargo/env
+            cd /home/bluefin/src
+            cargo build --release
+            
+            # Copy to opt folder
+            sudo cp /home/bluefin/src/target/release/bluefin-api /opt/bluefin-api/bluefin-api
+            sudo chmod +x /opt/bluefin-api/bluefin-api
+            
+            # Restart backend systemd daemon
+            sudo systemctl restart bluefin-api
+            sudo systemctl status bluefin-api --no-pager
+          EOF
