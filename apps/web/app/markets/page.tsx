@@ -78,6 +78,17 @@ function JupiterConsensus() {
 export default function MarketsPage() {
   const [filter, setFilter] = useState("all");
 
+  const { data: jupEvents } = useQuery<JupEventRow[]>({
+    queryKey: ["jupiter-wc"],
+    queryFn: async () => {
+      const res = await fetch("/api/jupiter");
+      if (!res.ok) throw new Error("jupiter unavailable");
+      return res.json();
+    },
+    staleTime: 60_000,
+    retry: 1,
+  });
+
   // ponytail: initialData keeps first paint instant; swap for pure fetch once a real backend exists
   const { data: events } = useQuery<MatchEvent[]>({
     queryKey: ["markets"],
@@ -100,16 +111,63 @@ export default function MarketsPage() {
       }),
   });
 
-  const cards = events
-    .flatMap((ev) =>
-      ev.categories.map((cat) => {
+  const baseCards = (events ?? []).flatMap((ev) =>
+    ev.categories.map((cat) => {
+      const top = cat.outcomes.reduce((a, b) => (b.pct > a.pct ? b : a), cat.outcomes[0]);
+      return { ev, cat, top };
+    })
+  );
+
+  const espArgEvent = (events ?? []).find((e) => e.id === "esp-arg");
+  const jupCards = (jupEvents && espArgEvent)
+    ? jupEvents.map((je) => {
+        const cat = {
+          id: je.id,
+          label: je.title.replace("World Cup: ", "").replace("World Cup Finals: ", "").replace("FIFA World Cup: ", ""),
+          question: je.title,
+          vol: je.outcomes.reduce((acc, o) => acc + o.vol, 0) >= 1000 
+            ? `$${Math.round(je.outcomes.reduce((acc, o) => acc + o.vol, 0) / 1000)}K` 
+            : `$${je.outcomes.reduce((acc, o) => acc + o.vol, 0)}`,
+          outcomes: je.outcomes.map((o) => {
+            const p = Math.min(Math.max(o.pct, 1), 99) / 100;
+            const yesOdds = Math.round((1 / p) * 100) / 100;
+            const noOdds = Math.round((1 / (1 - p)) * 100) / 100;
+            const result = je.live === false && espArgEvent.status === "finished"
+              ? (o.pct >= 95 ? ("YES" as const) : o.pct <= 5 ? ("NO" as const) : undefined)
+              : undefined;
+
+            return {
+              label: o.label,
+              pct: o.pct,
+              yesOdds,
+              noOdds,
+              ...(result ? { result } : {})
+            };
+          })
+        };
         const top = cat.outcomes.reduce((a, b) => (b.pct > a.pct ? b : a), cat.outcomes[0]);
-        return { ev, cat, top };
+        return { ev: espArgEvent, cat, top };
       })
-    )
-    .filter(
-      ({ ev, cat }) => filter === "all" || (filter === "live" ? ev.status === "live" : cat.id === filter)
-    );
+    : [];
+
+  const cards = [...baseCards, ...jupCards].filter(({ ev, cat }) => {
+    if (filter === "all") return true;
+    if (filter === "live") return ev.status === "live";
+    if (cat.id === filter) return true;
+
+    // Classification mapping for Jupiter events
+    const idLower = cat.question.toLowerCase();
+    if (filter === "scorer" && (idLower.includes("goals") || idLower.includes("scorer") || idLower.includes("assist") || idLower.includes("contribution"))) {
+      return true;
+    }
+    if (filter === "nextgoal" && idLower.includes("penalty")) {
+      return true;
+    }
+    if (filter === "result" && idLower.includes("method of victory")) {
+      return true;
+    }
+    return false;
+  });
 
   return (
     <div className="max-w-[1280px] mx-auto px-5 md:px-10 pt-12 pb-20">
