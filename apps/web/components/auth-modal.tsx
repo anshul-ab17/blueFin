@@ -57,24 +57,10 @@ export default function AuthModal() {
   }, [connected, authOpen, router]);
 
   // connect only after the provider has flushed the selection, otherwise the
-  // connect event fires before the provider subscribes and the UI never updates
   useEffect(() => {
     if (!pending || wallet?.adapter.name !== pending) return;
-    
-    // Use a small delay so that autoConnect has time to run and set the connecting state,
-    // avoiding duplicate parallel connection calls which cause instant cancellations.
-    const timer = setTimeout(() => {
-      setPending(null);
-      if (wallet.adapter.connected || wallet.adapter.connecting) return;
-      connect().catch(() => {
-        if (!wallet.adapter.connected && !wallet.adapter.connecting) {
-          flashToast("Wallet connection cancelled");
-        }
-      });
-    }, 150);
-
-    return () => clearTimeout(timer);
-  }, [pending, wallet, connect, flashToast]);
+    setPending(null);
+  }, [pending, wallet]);
 
   if (!authOpen) return null;
 
