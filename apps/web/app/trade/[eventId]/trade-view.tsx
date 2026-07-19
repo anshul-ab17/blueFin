@@ -10,7 +10,7 @@ import LiveDot from "@/components/live-dot";
 import PageBackdrop from "@/components/page-backdrop";
 import { FillBar, HoverCard, Magnetic, Reveal } from "@/components/fx";
 import OddsChart from "@/components/odds-chart";
-import { RECENT_TRADES, SETTLEMENTS } from "@/lib/data";
+import { LIVE_TRADES, RECENT_TRADES, SETTLEMENTS } from "@/lib/data";
 import { useAppStore } from "@/lib/store";
 
 const QUICK_STAKES = [10, 25, 50, 100];
@@ -316,7 +316,7 @@ export default function TradeView({
             <div className="bg-panel border border-line rounded-[14px] p-[18px]">
               <div className="font-heading font-bold text-[13px] text-fg mb-3">Recent Activity</div>
               <div className="flex flex-col gap-2.5">
-                {RECENT_TRADES.slice(0, 4).map((tr, i) => (
+                {(isLive ? LIVE_TRADES : RECENT_TRADES).slice(0, 4).map((tr, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs">
                     <span
                       className={`font-heading font-bold text-[10px] px-1.5 py-0.5 rounded ${

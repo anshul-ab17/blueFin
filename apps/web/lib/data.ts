@@ -168,6 +168,8 @@ const FINAL: MatchEvent = {
   teamA: "Spain", codeA: "ESP", colorA: COLORS.ESP,
   teamB: "Argentina", codeB: "ARG", colorB: COLORS.ARG,
   status: "live",
+  score: { a: 0, b: 0 },
+  timeRemaining: "45′ · 2nd Half",
   dateLabel: "World Cup 2026 · Final",
   categories: [
     {
@@ -244,6 +246,14 @@ export const PROOFS: Proof[] = [
     sig: "3mR5tUvXpQd8wLc1nJhF6yBa9zVe2sTo6cN",
     time: "Jul 14, 2026 · 22:47 UTC",
   },
+];
+
+// in-play trades on the live Final, shown on the trade page
+export const LIVE_TRADES = [
+  { side: "YES" as const, label: "Spain · Match Result", amount: "$320", time: "12s ago" },
+  { side: "NO" as const, label: "Draw · Match Result", amount: "$150", time: "40s ago" },
+  { side: "YES" as const, label: "Over 2.5 · Total Goals", amount: "$500", time: "1m ago" },
+  { side: "YES" as const, label: "Yamal · First Scorer", amount: "$85", time: "3m ago" },
 ];
 
 // settled trades from the finished bracket (see R16/QF/SF above) — matches real results
