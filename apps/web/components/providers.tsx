@@ -10,13 +10,16 @@ import { useAppStore } from "@/lib/store";
 function WalletSync({ children }: { children: React.ReactNode }) {
   const { publicKey, connected } = useWallet();
   const setWallet = useAppStore((s) => s.setWallet);
+  const disconnect = useAppStore((s) => s.disconnect);
 
   useEffect(() => {
     if (connected && publicKey) {
       const addr = publicKey.toBase58();
       setWallet(`${addr.slice(0, 4)}...${addr.slice(-4)}`);
+    } else {
+      disconnect();
     }
-  }, [connected, publicKey, setWallet]);
+  }, [connected, publicKey, setWallet, disconnect]);
 
   return <>{children}</>;
 }
