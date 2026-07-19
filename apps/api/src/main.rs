@@ -24,6 +24,17 @@ async fn main() -> anyhow::Result<()> {
     if let Err(e) = txline::ingest::resync(&state).await {
         tracing::warn!(?e, "initial txline resync failed (check TXLINE_JWT/TXLINE_API_TOKEN)");
     }
+    // Preflight: the settlement worker shells out to `bun scripts/settle.ts`. If bun is not
+    // on PATH, markets silently never resolve — warn loudly at startup instead.
+    match std::process::Command::new("bun").arg("--version").output() {
+        Ok(o) if o.status.success() => {
+            tracing::info!("bun {} detected", String::from_utf8_lossy(&o.stdout).trim());
+        }
+        _ => tracing::warn!(
+            "`bun` not found on PATH — settlement worker cannot resolve markets. Install bun on the deploy host."
+        ),
+    }
+
     txline::ingest::spawn(state.clone());
     settlement::spawn(state.clone());
 
