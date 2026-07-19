@@ -1,0 +1,170 @@
+# Bluefin - Software Design Document
+
+**Author:** Anshul  
+**Created:** July 16, 2026  
+**Status:** MVP Live  
+
+---
+
+## Core Vision and Product MVP
+
+Bluefin combines the best operational properties of Polymarket (fast Web3 markets), Hyperliquid (high-performance trading backend), and Kalshi (clean event definitions) into a football-first decentralized prediction exchange.
+
+> **Key Target:** World Cup 2026 markets. Bluefin streams real-time score feeds, calculates de-margined probabilities, allows users to place instant bets on YES/NO shares, and verification is done cryptographically using Merkle proofs generated directly from the score oracle.
+
+### MVP Key Features
+
+- **Wallet Connection:** Authentic devnet wallet connectivity with the Phantom wallet via `@solana/wallet-adapter`, and a simulated demo fallback for seamless user onboarding.
+- **Knockout Bracket Markets:** Active markets covering the World Cup 2026 fixture progression from the Round of 32 to the Finals.
+- **YES / NO Trading Interface:** Dynamic order slip calculations, calculating share payouts (Stake x Odds) instantly.
+- **Live Odds and Scores:** Streaming feeds of match clocks, live scores, and updated probabilities.
+- **Trustless Settlement:** On-chain settlement based on Merkle Proofs validated via a validation program on Solana, removing human oracle risk.
+
+### Supported World Cup 2026 Markets
+
+Markets are created per-fixture under specific categories:
+
+- **Match Result:** Full-time winner (Team A / Team B / Draw)
+- **Total Goals:** Under/Over 2.5 goals
+- **Next Goal:** Live tracking of which team scores next
+- **First Scorer:** Scorer-specific odds (e.g. Kylian Mbappe, Lamine Yamal)
+
+---
+
+## System Architecture
+
+Bluefin employs a decoupled server architecture. Decoupling the high-frequency ingestion workers from the Vercel-native web platform avoids running long-lived stateful processes inside serverless functions.
+
+```
+TxLINE SSE (txline-dev.txodds.com)
+          │
+          ▼  [Long-Lived Ingestion Worker]
+    Rust Ingestion (apps/api, Axum/Tokio)
+          │
+          ├───────────────┐
+          ▼               ▼
+    PostgreSQL/SQLite    Redis (Leaderboard / WebSocket PubSub)
+          │
+    REST + WebSockets (EC2 / Railway host)
+          │
+          ▲
+    Next.js Frontend (apps/web on Vercel)
+          │
+          ▼  [Client Wallet Signature]
+    Phantom Wallet Adapter -> Solana Devnet Validator Program
+```
+
+### Infrastructure Components
+
+| Component | Host Environment | Responsibilities |
+|---|---|---|
+| **apps/web** | Vercel (Next.js 16 / React 19) | Renders user dashboard, portfolio stats, live odds, and integrates Phantom wallet connection. |
+| **apps/api** | AWS EC2 / Railway (Rust Axum) | SSE ingestion, rate-limiting, SQLite state management, order slip signing, and leaderboard maintenance. |
+| **Anchor Program** | Solana Devnet | Trustless escrow accounts, Merkle validation, and payouts execution. |
+
+---
+
+## Folder and Code Structure
+
+Bluefin is built inside a Turborepo monorepo workspace managed by Bun. This structure guarantees unified type contracts between the frontend, API client, and Solana program.
+
+```
+bluefin/
+├── apps/
+│   ├── web/               # Next.js 16 App Router UI
+│   │   ├── app/           # App routes (/, /markets, /trade/[id], /bets, /portfolio)
+│   │   ├── components/    # Reusable shadcn / custom interface components
+│   │   └── lib/           # Zustand state, Tanstack Query configuration, API bindings
+│   └── api/               # Rust / Axum back-end ingestion and REST service
+│       ├── src/
+│       │   ├── txline/    # SSE streams subscriber and snapshot resync logic
+│       │   ├── db.rs      # Database queries, SQLite migration setups
+│       │   ├── http.rs    # Axum routing, rate-limiter middleware, CORS guards
+│       │   └── main.rs    # Entry point & systemd hook diagnostics
+├── packages/
+│   └── types/             # Shared typescript definitions (@bluefin/types)
+└── contracts/
+    └── bluefin/           # Solana Anchor contract logic (escrow, settlement validation)
+```
+
+---
+
+## Database Schema
+
+The system's database schema maps directly to structural types defined inside `@bluefin/types`. The production target uses Postgres, while the local active build runs an optimized SQLite storage layer.
+
+### Database Tables
+
+| Table | Primary Columns | Description |
+|---|---|---|
+| **markets** | `id (PK)`, `teams`, `status`, `score`, `time_remaining` | Main events containing fixture state, match clocks, and outcomes. |
+| **outcomes** | `market_id (FK)`, `label (PK)`, `probability_pct`, `yes_odds`, `no_odds` | Dynamic YES/NO odds computed from demargined probabilities. |
+| **trades** | `id (PK)`, `wallet`, `market_id`, `side`, `stake`, `odds`, `payout` | Historical bets matched and pending on-chain settlement triggers. |
+| **proofs** | `market_id (FK)`, `root`, `signature`, `proof_json` | Merkle proof packages generated by the score oracle upon finalization. |
+
+---
+
+## Deployment and Operations
+
+Bluefin's deployment is split into two primary pipelines: Vercel for the static frontend client and AWS EC2 for the Rust server backend behind Nginx and Cloudflare.
+
+### Deployment Targets
+
+#### apps/web (Frontend)
+- Deployed on Vercel.
+- Root directory set to `apps/web`.
+- Auto-detects Bun build runner.
+- Static generation for optimal speeds.
+
+#### apps/api (Backend)
+- Hosted on AWS EC2 (ap-south-1).
+- Running as a systemd background service.
+- Reverse proxy via Nginx port 443.
+- Cloudflare proxy active for DDoS shield.
+
+### Backend Systemd Service Config
+
+```ini
+[Unit]
+Description=Bluefin Rust Backend Ingestion Service
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/bluefin-api
+EnvironmentFile=/opt/bluefin-api/.env
+ExecStart=/opt/bluefin-api/target/release/bluefin-api
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+---
+
+## Hardened Security Docs
+
+The production-ready backend has been heavily hardened against critical vulnerabilities identified during MVP testing phases.
+
+> **Vulnerability Fixes Shipped:**
+> - **Unbounded Quote-Book Memory Cap:** Added a hard cap of `50,000` quotes in memory and an automated eviction runner for expired quotes in `trades.rs`, preventing OOM DoS attacks.
+> - **Zero-Dependency Rate Limiting:** Added custom Axum middleware inside `http.rs` restricting clients to `100 requests per 10s per IP` via the proxy `x-forwarded-for` header.
+> - **Strict CORS Policies:** Allowed origins are locked via the `ALLOWED_ORIGINS` environment variable, reverting to wildcard permissions only in local development modes.
+> - **SQLite Lock Prevention:** SQLite settings have been optimized to run in **WAL (Write-Ahead Logging)** mode with a `busy_timeout(5000)` configuration to eliminate lock contention under heavy trade volume.
+
+---
+
+## TxLINE Ingestion Details
+
+The real-time backbone of Bluefin's prediction exchange is the **TxLINE SSE Feed (TxODDS)**. Live match fixtures, score states, and probabilities stream directly to my worker client.
+
+> **Ingestion Pipeline Flow:**  
+> TxLINE SSE Stream -> `txline/ingest.rs` (SSE Consumer) -> De-margining Logic -> SQLite DB Sync -> WS clients.
+
+### Friction and Solutions
+
+1. **JWT Token Expiry (30 Days):** The TxLINE integration tokens expire monthly. Bluefin manages this via an automatic activation script `apps/api/scripts/activate.ts` that copies new tokens into the `.env` context on the server.
+2. **SSE Proxy Timeout:** Cloudflare proxies cut idle SSE streams at 100 seconds. My Rust ingestion service includes robust reconnect loops with exponential backoff and automatic snapshot resyncs to avoid stale match data when streams are dropped.
+3. **On-Chain Resolution:** When TxLINE reports `game_finalised` event, a background settlement loop collects the signed Merkle proof from TxLINE, posts the payload to the Anchor contract, and settles the escrow payouts trustlessly.

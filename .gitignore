@@ -11,7 +11,5 @@ dist/
 CLAUDE.md
 AGENTS.md
 .claude/
-/docs
 *.db
 apps/api/target/
-bluefin/docs
