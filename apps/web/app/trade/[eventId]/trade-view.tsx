@@ -45,6 +45,9 @@ export default function TradeView({
   const flashToast = useAppStore((s) => s.flashToast);
 
   const isLive = event.status === "live";
+  const isFinished = event.status === "finished";
+  const winnerName =
+    event.winner === "A" ? event.teamA : event.winner === "B" ? event.teamB : event.winner === "draw" ? "Draw" : null;
 
   const pick = (category: string, row: Outcome, side: Side) => {
     setSlip({ category, outcome: row.label, side, odds: side === "YES" ? row.yesOdds : row.noOdds });
@@ -80,12 +83,14 @@ export default function TradeView({
               ? <FlagIcon code={event.codeA} size="lg" />
               : <TeamBadge code={event.codeA} color={event.colorA} size="md" />}
             <div className="text-center">
-              {isLive && event.score ? (
+              {(isLive || isFinished) && event.score ? (
                 <>
                   <div className="font-heading font-bold text-[34px] leading-none text-white">
                     {event.score.a} — {event.score.b}
                   </div>
-                  <div className="font-semibold text-xs text-muted mt-1">{event.timeRemaining}</div>
+                  <div className={`font-semibold text-xs mt-1 ${isFinished ? "text-dim" : "text-muted"}`}>
+                    {isFinished ? "FINAL" : event.timeRemaining}
+                  </div>
                 </>
               ) : (
                 <div className="font-semibold text-sm text-muted">vs</div>
@@ -108,6 +113,11 @@ export default function TradeView({
                 LIVE
               </span>
             )}
+            {isFinished && (
+              <span className="inline-flex items-center gap-1.5 font-heading font-bold text-[11px] tracking-[1px] bg-panel-2 border border-line-2 text-muted px-3 py-[5px] rounded-xl">
+                ✓ FINAL
+              </span>
+            )}
             <div className="text-right">
               <div className="font-semibold text-[11px] text-dim uppercase">Volume</div>
               <div className="font-heading font-bold text-[15px] text-fg">{totalVolume(event)}</div>
@@ -119,15 +129,18 @@ export default function TradeView({
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-[22px] items-start">
         {/* MARKETS */}
         <div className="flex flex-col gap-3.5">
-          <OddsChart
-            marketId={event.id}
-            category={
-              (event.categories.find((c) => c.label === slip.category) ?? event.categories[0]).id
-            }
-            labels={
-              (event.categories.find((c) => c.label === slip.category) ?? event.categories[0]).outcomes.map((o) => o.label)
-            }
-          />
+          {(() => {
+            const activeCat = event.categories.find((c) => c.label === slip.category) ?? event.categories[0];
+            return (
+              <OddsChart
+                marketId={event.id}
+                category={activeCat.id}
+                labels={activeCat.outcomes.map((o) => o.label)}
+                finished={isFinished}
+                finalPcts={activeCat.outcomes.map((o) => o.pct)}
+              />
+            );
+          })()}
           {event.categories.map((cat, i) => (
             <Reveal key={cat.id} delay={i * 80}>
               <HoverCard className="bg-panel border border-line rounded-[14px] p-5 transition-all duration-[250ms] hover:-translate-y-1 hover:border-btn-border">
@@ -145,20 +158,34 @@ export default function TradeView({
                   {cat.outcomes.map((row, j) => (
                     <div key={row.label} className="flex flex-wrap items-center gap-2 md:gap-3.5">
                       <div className="w-[110px] font-semibold text-[13px] text-soft-fg group-hover:text-fg transition-colors duration-300">{row.label}</div>
-                      <FillBar pct={row.pct} barClass={j === 0 ? "bg-accent" : "bg-faint"} />
+                      <FillBar pct={row.pct} barClass={row.result === "YES" ? "bg-win" : j === 0 ? "bg-accent" : "bg-faint"} />
                       <span className="font-heading font-bold text-xs text-muted w-9 text-right group-hover:text-accent-soft transition-colors duration-300">{row.pct}%</span>
-                      <button
-                        onClick={() => pick(cat.label, row, "YES")}
-                        className="bg-btn border border-btn-border text-accent-soft font-heading font-bold text-xs px-3 py-[7px] rounded-md cursor-pointer transition-all hover:bg-[#24498a] hover:shadow-[0_0_16px_rgba(77,159,255,0.3)]"
-                      >
-                        YES {row.yesOdds.toFixed(2)}x
-                      </button>
-                      <button
-                        onClick={() => pick(cat.label, row, "NO")}
-                        className="bg-[#161f2c] border border-line-2 text-no font-heading font-bold text-xs px-3 py-[7px] rounded-md cursor-pointer transition-all hover:bg-[#1f2a3a] hover:shadow-[0_0_16px_rgba(217,139,139,0.25)]"
-                      >
-                        NO {row.noOdds.toFixed(2)}x
-                      </button>
+                      {isFinished ? (
+                        <span
+                          className={`font-heading font-bold text-[11px] tracking-[0.5px] px-3 py-[7px] rounded-md ${
+                            row.result === "YES"
+                              ? "bg-[rgba(34,197,94,0.15)] border border-live text-win"
+                              : "bg-[#161f2c] border border-line-2 text-dim"
+                          }`}
+                        >
+                          {row.result === "YES" ? "WON" : "LOST"}
+                        </span>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => pick(cat.label, row, "YES")}
+                            className="bg-btn border border-btn-border text-accent-soft font-heading font-bold text-xs px-3 py-[7px] rounded-md cursor-pointer transition-all hover:bg-[#24498a] hover:shadow-[0_0_16px_rgba(77,159,255,0.3)]"
+                          >
+                            YES {row.yesOdds.toFixed(2)}x
+                          </button>
+                          <button
+                            onClick={() => pick(cat.label, row, "NO")}
+                            className="bg-[#161f2c] border border-line-2 text-no font-heading font-bold text-xs px-3 py-[7px] rounded-md cursor-pointer transition-all hover:bg-[#1f2a3a] hover:shadow-[0_0_16px_rgba(217,139,139,0.25)]"
+                          >
+                            NO {row.noOdds.toFixed(2)}x
+                          </button>
+                        </>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -184,6 +211,27 @@ export default function TradeView({
 
         {/* TRADE SLIP + SIDE PANELS */}
         <div className="lg:sticky lg:top-[86px] flex flex-col gap-3.5">
+          {isFinished ? (
+            <Reveal delay={100}>
+              <div className="bg-panel border border-line rounded-2xl p-[22px] text-center">
+                <div className="w-11 h-11 mx-auto mb-3 rounded-full bg-[rgba(34,197,94,0.15)] border border-live flex items-center justify-center text-win text-xl">✓</div>
+                <div className="font-heading font-bold text-lg text-accent-soft mb-1">Outcome: {winnerName}</div>
+                <div className="font-semibold text-[13px] text-muted mb-3.5">Match Result · settled on-chain</div>
+                <div className="bg-[#0a1a29] border border-line rounded-[10px] p-3.5 mb-3.5 text-left">
+                  <div className="font-semibold text-[11px] text-dim uppercase mb-1.5">Final Score</div>
+                  <div className="font-heading font-bold text-xl text-white">
+                    {event.teamA} {event.score?.a} — {event.score?.b} {event.teamB}
+                  </div>
+                </div>
+                <Link
+                  href="/proofs"
+                  className="block w-full bg-transparent border border-line-2 !text-accent-soft font-bold text-sm py-3 rounded-xl no-underline hover:border-btn-border transition-colors"
+                >
+                  View Settlement Proof
+                </Link>
+              </div>
+            </Reveal>
+          ) : (
           <Reveal delay={100}>
             <div className="bg-panel border border-btn-border rounded-2xl p-[22px] shadow-[0_16px_44px_rgba(47,111,237,0.14)]">
               <div className="font-heading font-bold text-base text-fg mb-3.5">Place a Trade</div>
@@ -241,6 +289,7 @@ export default function TradeView({
               )}
             </div>
           </Reveal>
+          )}
 
           <Reveal delay={180}>
             <div className="bg-panel border border-line rounded-[14px] p-[18px]">

@@ -613,13 +613,14 @@ export default function Home() {
                   <div className="font-semibold text-xs text-dim group-hover:text-muted transition-colors duration-300">World Cup 2026</div>
                   <div className="flex items-center gap-3">
                     {hasFlag(m.codeA) ? <FlagIcon code={m.codeA} size="sm" /> : <TeamBadge code={m.codeA} color={m.colorA} size="sm" />}
-                    <span className="font-heading font-bold text-2xl text-white group-hover:text-accent-soft transition-colors duration-300">{m.score}</span>
+                    <span className="font-heading font-bold text-2xl text-white group-hover:text-accent-soft transition-colors duration-300">
+                      {"score" in m ? (m as { score: string }).score : "vs"}
+                    </span>
                     {hasFlag(m.codeB) ? <FlagIcon code={m.codeB} size="sm" /> : <TeamBadge code={m.codeB} color={m.colorB} size="sm" />}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-[11px] text-dim">vs</span>
-                    <span className="font-semibold text-xs text-muted ml-1 group-hover:text-accent transition-colors duration-300">{m.clock}</span>
-                  </div>
+                  {"clock" in m && (
+                    <div className="font-semibold text-xs text-muted group-hover:text-accent transition-colors duration-300">{(m as { clock: string }).clock}</div>
+                  )}
                 </HoverCard>
               </Reveal>
             ))}

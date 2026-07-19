@@ -5,6 +5,7 @@ export interface Outcome {
   pct: number;
   yesOdds: number;
   noOdds: number;
+  result?: Side;
 }
 
 export interface MarketCategory {
@@ -15,6 +16,8 @@ export interface MarketCategory {
   outcomes: Outcome[];
 }
 
+export type BracketRound = "R16" | "QF" | "SF" | "Final" | "3rd";
+
 export interface MatchEvent {
   id: string;
   teamA: string;
@@ -23,10 +26,16 @@ export interface MatchEvent {
   colorA: string;
   codeB: string;
   colorB: string;
-  status: "live" | "upcoming";
+  status: "live" | "upcoming" | "finished";
   dateLabel: string;
   score?: { a: number; b: number };
   timeRemaining?: string;
+  /** knockout round, for the fixture bracket */
+  round?: BracketRound;
+  /** venue shown in bracket, e.g. "New York/New Jersey" */
+  venue?: string;
+  /** winner side for finished matches */
+  winner?: "A" | "B" | "draw";
   categories: MarketCategory[];
 }
 

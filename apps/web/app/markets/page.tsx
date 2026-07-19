@@ -9,10 +9,12 @@ import FlagIcon, { hasFlag } from "@/components/flag-icon";
 import LiveDot from "@/components/live-dot";
 import PageBackdrop from "@/components/page-backdrop";
 import { FillBar, HoverCard, PageTitle, Reveal } from "@/components/fx";
+import FixtureBracket from "@/components/fixture-bracket";
 import { EVENTS } from "@/lib/data";
 
 const FILTERS = [
   { id: "all", label: "All" },
+  { id: "fixture", label: "Fixture" },
   { id: "live", label: "Live" },
   { id: "result", label: "Match Result" },
   { id: "totalgoals", label: "Total Goals" },
@@ -102,8 +104,8 @@ export default function MarketsPage() {
     <div className="max-w-[1280px] mx-auto px-5 md:px-10 pt-12 pb-20">
       <PageBackdrop src="/assets/bg/water2.webp" />
       <PageTitle
-        eyebrow="World Cup 2026"
-        title="Markets"
+        eyebrow="Football"
+        title="World Cup 2026"
         subtitle="Trustless prediction markets settled on-chain, powered by TxLINE real-time data."
         size={40}
       />
@@ -120,6 +122,9 @@ export default function MarketsPage() {
           </button>
         ))}
       </div>
+      {filter === "fixture" ? (
+        <FixtureBracket />
+      ) : (
       <div className="grid grid-cols-[repeat(auto-fill,minmax(min(340px,100%),1fr))] gap-5">
         {cards.map(({ ev, cat, top }, i) => (
           <Reveal key={`${ev.id}-${cat.id}`} delay={(i % 6) * 70}>
@@ -169,6 +174,7 @@ export default function MarketsPage() {
           </Reveal>
         ))}
       </div>
+      )}
       <JupiterConsensus />
     </div>
   );
