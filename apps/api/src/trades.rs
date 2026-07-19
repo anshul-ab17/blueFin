@@ -10,6 +10,8 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 use crate::state::AppState;
 
 const QUOTE_TTL: Duration = Duration::from_secs(30);
+/// Backstop against a burst of quote requests within the TTL window filling memory.
+const MAX_QUOTES: usize = 50_000;
 
 #[derive(Clone)]
 pub struct Quote {
@@ -68,17 +70,26 @@ pub async fn post_quote(
     }
     let odds = if req.side == "YES" { yes } else { no };
     let id = quote_id();
-    QUOTES
-        .lock()
-        .unwrap()
-        .get_or_insert_with(HashMap::new)
-        .insert(id.clone(), Quote {
+    {
+        // unwrap_or_else(into_inner): a panic elsewhere must not permanently poison the book.
+        let mut guard = QUOTES.lock().unwrap_or_else(|p| p.into_inner());
+        let map = guard.get_or_insert_with(HashMap::new);
+        // sweep expired quotes on every insert so the book can't grow unbounded (DoS guard).
+        map.retain(|_, q| q.issued.elapsed() <= QUOTE_TTL);
+        if map.len() >= MAX_QUOTES {
+            return Err((
+                StatusCode::TOO_MANY_REQUESTS,
+                Json(json!({ "error": "quote book full, retry shortly" })),
+            ));
+        }
+        map.insert(id.clone(), Quote {
             outcome_id: req.outcome_id,
             side: req.side.clone(),
             stake: req.stake,
             odds,
             issued: Instant::now(),
         });
+    }
     Ok(Json(json!({
         "quoteId": id,
         "outcomeId": req.outcome_id,
@@ -117,7 +128,7 @@ pub async fn post_trade(
     }
     let quote = QUOTES
         .lock()
-        .unwrap()
+        .unwrap_or_else(|p| p.into_inner())
         .get_or_insert_with(HashMap::new)
         .remove(&req.quote_id);
     let Some(q) = quote else { return Err(bad("unknown quote")) };

@@ -124,20 +124,30 @@ fn fmt_vol(v: f64) -> String {
     }
 }
 
-async fn category_vol(state: &AppState, market_id: &str, category: &str) -> f64 {
-    sqlx::query_scalar::<_, Option<f64>>(
-        "SELECT SUM(t.stake) FROM trades t JOIN outcomes o ON o.id = t.outcome_id WHERE o.market_id = ? AND o.category = ?",
-    )
-    .bind(market_id)
-    .bind(category)
-    .fetch_one(&state.db)
-    .await
-    .ok()
-    .flatten()
-    .unwrap_or(0.0)
+type VolMap = std::collections::HashMap<(String, String), f64>;
+
+/// Traded volume per (market_id, category) in a single grouped query. Pass `market`
+/// to scope to one market (get_market), or None for all markets (list_markets).
+async fn category_vols(state: &AppState, market: Option<&str>) -> sqlx::Result<VolMap> {
+    let rows: Vec<(String, String, Option<f64>)> = match market {
+        Some(mid) => sqlx::query_as(
+            "SELECT o.market_id, o.category, SUM(t.stake) FROM trades t \
+             JOIN outcomes o ON o.id = t.outcome_id WHERE o.market_id = ? GROUP BY o.market_id, o.category",
+        )
+        .bind(mid)
+        .fetch_all(&state.db)
+        .await?,
+        None => sqlx::query_as(
+            "SELECT o.market_id, o.category, SUM(t.stake) FROM trades t \
+             JOIN outcomes o ON o.id = t.outcome_id GROUP BY o.market_id, o.category",
+        )
+        .fetch_all(&state.db)
+        .await?,
+    };
+    Ok(rows.into_iter().map(|(m, c, v)| ((m, c), v.unwrap_or(0.0))).collect())
 }
 
-async fn event_json(state: &AppState, m: &MarketRow, outcomes: Vec<OutcomeRow>) -> Value {
+fn event_json(m: &MarketRow, outcomes: Vec<OutcomeRow>, vols: &VolMap) -> Value {
     // group outcomes by category, preserving insertion order
     let mut order: Vec<String> = Vec::new();
     for o in &outcomes {
@@ -159,11 +169,12 @@ async fn event_json(state: &AppState, m: &MarketRow, outcomes: Vec<OutcomeRow>) 
                 })
             })
             .collect();
+        let vol = vols.get(&(m.id.clone(), cat.clone())).copied().unwrap_or(0.0);
         categories.push(json!({
             "id": cat,
             "label": category_label(cat),
             "question": category_question(cat, m),
-            "vol": fmt_vol(category_vol(state, &m.id, cat).await),
+            "vol": fmt_vol(vol),
             "outcomes": outs,
         }));
     }
@@ -189,11 +200,22 @@ async fn event_json(state: &AppState, m: &MarketRow, outcomes: Vec<OutcomeRow>) 
 
 async fn list_markets(State(state): State<AppState>) -> Result<Json<Value>, StatusCode> {
     let rows = db::markets(&state.db).await.map_err(internal)?;
-    let mut out = Vec::new();
-    for m in &rows {
-        let outcomes = db::outcomes_for(&state.db, &m.id).await.map_err(internal)?;
-        out.push(event_json(&state, m, outcomes).await);
+    // one query for every market's outcomes, one for every volume — no per-market round-trips.
+    let all_outcomes: Vec<OutcomeRow> = sqlx::query_as(
+        "SELECT id, market_id, category, label, yes_odds, no_odds, pct FROM outcomes ORDER BY market_id, id",
+    )
+    .fetch_all(&state.db)
+    .await
+    .map_err(internal)?;
+    let mut by_market: std::collections::HashMap<String, Vec<OutcomeRow>> = std::collections::HashMap::new();
+    for o in all_outcomes {
+        by_market.entry(o.market_id.clone()).or_default().push(o);
     }
+    let vols = category_vols(&state, None).await.map_err(internal)?;
+    let out: Vec<Value> = rows
+        .iter()
+        .map(|m| event_json(m, by_market.remove(&m.id).unwrap_or_default(), &vols))
+        .collect();
     Ok(Json(Value::Array(out)))
 }
 
@@ -206,7 +228,8 @@ async fn get_market(
         return Err((StatusCode::NOT_FOUND, Json(json!({ "error": "market not found" }))));
     };
     let outcomes = db::outcomes_for(&state.db, &m.id).await.map_err(|_| internal_resp())?;
-    Ok(Json(event_json(&state, &m, outcomes).await))
+    let vols = category_vols(&state, Some(&m.id)).await.map_err(|_| internal_resp())?;
+    Ok(Json(event_json(&m, outcomes, &vols)))
 }
 
 /// GET /api/markets/{id}/history?category=result&window=1d
