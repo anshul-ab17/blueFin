@@ -267,10 +267,9 @@ export default function OddsChart({
   }, []);
 
   useEffect(() => {
-    const base = process.env.NEXT_PUBLIC_API_URL;
-    if (!base) return;
     setLoading(true);
-    fetch(`${base}/api/markets/${marketId}/history?category=${category}&window=${toWindowParam(window)}`)
+    // proxied through the Next API so the browser never hits the backend origin directly
+    fetch(`/api/markets/${marketId}/history?category=${category}&window=${toWindowParam(window)}`)
       .then((r) => r.json())
       .then((d) => setData(d))
       .catch(() => setData(null))
@@ -327,13 +326,9 @@ export default function OddsChart({
             <circle cx="16" cy="22" r="2" fill="#4d9fff"/>
             <circle cx="24" cy="10" r="2" fill="#4d9fff"/>
           </svg>
-          <span className="font-semibold text-xs text-dim">
-            {process.env.NEXT_PUBLIC_API_URL ? "No odds history yet" : "Backend not connected"}
-          </span>
+          <span className="font-semibold text-xs text-dim">No odds history yet</span>
           <span className="font-medium text-[11px] text-faint text-center max-w-[220px]">
-            {process.env.NEXT_PUBLIC_API_URL
-              ? "Odds history will appear as the market accumulates data"
-              : "Set NEXT_PUBLIC_API_URL to connect the live backend"}
+            Odds history will appear as the market accumulates data
           </span>
         </div>
       ) : (

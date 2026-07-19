@@ -47,19 +47,27 @@ export default function AuthModal() {
   const authOpen = useAppStore((s) => s.authOpen);
   const closeAuth = useAppStore((s) => s.closeAuth);
   const flashToast = useAppStore((s) => s.flashToast);
-  const { wallets, wallet, select, connect } = useWallet();
+  const { wallets, wallet, select, connect, connected } = useWallet();
   const [pending, setPending] = useState<WalletName | null>(null);
   const router = useRouter();
+
+  // navigate once connected, whichever path (manual connect or autoConnect) won
+  useEffect(() => {
+    if (connected && authOpen) router.push("/markets");
+  }, [connected, authOpen, router]);
 
   // connect only after the provider has flushed the selection, otherwise the
   // connect event fires before the provider subscribes and the UI never updates
   useEffect(() => {
     if (!pending || wallet?.adapter.name !== pending) return;
     setPending(null);
-    connect()
-      .then(() => router.push("/markets"))
-      .catch(() => flashToast("Wallet connection cancelled"));
-  }, [pending, wallet, connect, flashToast, router]);
+    if (wallet.adapter.connected) return;
+    connect().catch(() => {
+      // autoConnect may have raced us and already own the session —
+      // only surface the toast on a real rejection
+      if (!wallet.adapter.connected) flashToast("Wallet connection cancelled");
+    });
+  }, [pending, wallet, connect, flashToast]);
 
   if (!authOpen) return null;
 
