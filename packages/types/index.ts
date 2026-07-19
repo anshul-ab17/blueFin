@@ -16,7 +16,7 @@ export interface MarketCategory {
   outcomes: Outcome[];
 }
 
-export type BracketRound = "R16" | "QF" | "SF" | "Final" | "3rd";
+export type BracketRound = "R32" | "R16" | "QF" | "SF" | "Final" | "3rd";
 
 export interface MatchEvent {
   id: string;

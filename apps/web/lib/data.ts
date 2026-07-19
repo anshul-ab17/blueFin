@@ -8,6 +8,10 @@ const COLORS: Record<string, string> = {
   FRA: "#002395", ENG: "#c60b1e", POR: "#b5091c", NED: "#ff6600",
   MAR: "#006233", MEX: "#006847", BEL: "#111111", USA: "#1f2f6b",
   URU: "#5cb8e6", ITA: "#0064aa", JPN: "#bc002d", CRO: "#1c56a6",
+  KSA: "#1a7a3c", SEN: "#00853f", SUI: "#d52b1e", DEN: "#c8102e",
+  POL: "#dc143c", GHA: "#cf0921", KOR: "#0047a0", CAN: "#d80621",
+  AUS: "#ffb81c", ECU: "#ffd100", SRB: "#c6363c", TUN: "#e70013",
+  CMR: "#007a5e", NOR: "#ba0c2f", EGY: "#ce1126", COL: "#fcd116",
 };
 
 type TeamTuple = [name: string, code: string];
@@ -42,6 +46,7 @@ function finished(
   const pctA = winner === "A" ? 96 : winner === "B" ? 3 : 48;
   const pctB = winner === "B" ? 96 : winner === "A" ? 3 : 48;
   const pctD = winner === "draw" ? 96 : 1;
+  const over = scoreA + scoreB > 2;
   return {
     id,
     round,
@@ -64,12 +69,42 @@ function finished(
           outcome("Draw", pctD, winner === "draw" ? "YES" : "NO"),
         ],
       },
+      {
+        id: "totalgoals",
+        label: "Total Goals",
+        question: `Total Goals: ${a[1]} vs ${b[1]} over/under 2.5`,
+        vol,
+        outcomes: [
+          outcome("Over 2.5", over ? 96 : 4, over ? "YES" : "NO"),
+          outcome("Under 2.5", over ? 4 : 96, over ? "NO" : "YES"),
+        ],
+      },
     ],
   };
 }
 
 // ── World Cup 2026 knockout bracket ──────────────────────────────────────────
 // Coherent path: Spain & Argentina reach the Final; France & England play for 3rd.
+// R32 pairs feed the R16 fixtures in order (winners advance).
+const R32: MatchEvent[] = [
+  finished("esp-ksa", "R32", "Los Angeles", "Round of 32 · Jun 29", ["Spain", "ESP"], ["Saudi Arabia", "KSA"], 2, 0, "$310K"),
+  finished("ned-sen", "R32", "San Francisco", "Round of 32 · Jun 29", ["Netherlands", "NED"], ["Senegal", "SEN"], 2, 1, "$280K"),
+  finished("ger-sui", "R32", "Dallas", "Round of 32 · Jun 29", ["Germany", "GER"], ["Switzerland", "SUI"], 3, 1, "$340K"),
+  finished("cro-den", "R32", "Houston", "Round of 32 · Jun 30", ["Croatia", "CRO"], ["Denmark", "DEN"], 1, 0, "$220K"),
+  finished("fra-pol", "R32", "New York/New Jersey", "Round of 32 · Jun 30", ["France", "FRA"], ["Poland", "POL"], 3, 1, "$520K"),
+  finished("bra-gha", "R32", "Miami", "Round of 32 · Jun 30", ["Brazil", "BRA"], ["Ghana", "GHA"], 4, 1, "$480K"),
+  finished("por-kor", "R32", "Toronto", "Round of 32 · Jul 1", ["Portugal", "POR"], ["South Korea", "KOR"], 2, 0, "$300K"),
+  finished("mar-can", "R32", "Vancouver", "Round of 32 · Jul 1", ["Morocco", "MAR"], ["Canada", "CAN"], 1, 0, "$260K"),
+  finished("arg-aus", "R32", "Mexico City", "Round of 32 · Jul 1", ["Argentina", "ARG"], ["Australia", "AUS"], 2, 1, "$550K"),
+  finished("mex-ecu", "R32", "Guadalajara", "Round of 32 · Jul 2", ["Mexico", "MEX"], ["Ecuador", "ECU"], 1, 0, "$330K"),
+  finished("bel-srb", "R32", "Atlanta", "Round of 32 · Jul 2", ["Belgium", "BEL"], ["Serbia", "SRB"], 3, 2, "$290K"),
+  finished("usa-tun", "R32", "Seattle", "Round of 32 · Jul 2", ["United States", "USA"], ["Tunisia", "TUN"], 2, 1, "$470K"),
+  finished("eng-cmr", "R32", "Boston", "Round of 32 · Jul 3", ["England", "ENG"], ["Cameroon", "CMR"], 2, 0, "$360K"),
+  finished("uru-nor", "R32", "Kansas City", "Round of 32 · Jul 3", ["Uruguay", "URU"], ["Norway", "NOR"], 2, 0, "$210K"),
+  finished("ita-egy", "R32", "Philadelphia", "Round of 32 · Jul 3", ["Italy", "ITA"], ["Egypt", "EGY"], 1, 0, "$240K"),
+  finished("jpn-col", "R32", "Monterrey", "Round of 32 · Jul 3", ["Japan", "JPN"], ["Colombia", "COL"], 2, 1, "$250K"),
+];
+
 const R16: MatchEvent[] = [
   finished("esp-ned", "R16", "Los Angeles", "Round of 16 · Jul 5", ["Spain", "ESP"], ["Netherlands", "NED"], 3, 0, "$820K"),
   finished("ger-cro", "R16", "Dallas", "Round of 16 · Jul 5", ["Germany", "GER"], ["Croatia", "CRO"], 2, 1, "$540K"),
@@ -116,6 +151,13 @@ const THIRD: MatchEvent = {
       vol: "$180K",
       outcomes: [outcome("Over 2.5", 55), outcome("Under 2.5", 45)],
     },
+    {
+      id: "scorer",
+      label: "First Scorer",
+      question: "Will Kylian Mbappé score anytime?",
+      vol: "$96K",
+      outcomes: [outcome("Mbappé", 41), outcome("Other / None", 59)],
+    },
   ],
 };
 
@@ -125,7 +167,7 @@ const FINAL: MatchEvent = {
   venue: "New York/New Jersey",
   teamA: "Spain", codeA: "ESP", colorA: COLORS.ESP,
   teamB: "Argentina", codeB: "ARG", colorB: COLORS.ARG,
-  status: "upcoming",
+  status: "live",
   dateLabel: "World Cup 2026 · Final",
   categories: [
     {
@@ -159,7 +201,7 @@ const FINAL: MatchEvent = {
   ],
 };
 
-export const EVENTS: MatchEvent[] = [FINAL, THIRD, ...SF, ...QF, ...R16];
+export const EVENTS: MatchEvent[] = [FINAL, THIRD, ...SF, ...QF, ...R16, ...R32];
 
 export const TOP_TRADERS = [
   { rank: 1, name: "DeepBlue", volume: "$1.25M", change: "+24.6%" },

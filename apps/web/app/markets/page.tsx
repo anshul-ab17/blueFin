@@ -87,8 +87,17 @@ export default function MarketsPage() {
       return res.json();
     },
     initialData: EVENTS,
-    // API serves only live-odds events; overlay them on the full static fixture list
-    select: (live) => EVENTS.map((e) => live.find((l) => l.id === e.id) ?? e),
+    // API serves only live-odds events; overlay its odds on the full static fixture
+    // list, keeping static-only categories (props) and status intact
+    select: (live) =>
+      EVENTS.map((e) => {
+        const l = live.find((x) => x.id === e.id);
+        if (!l) return e;
+        return {
+          ...e,
+          categories: e.categories.map((c) => l.categories.find((lc) => lc.id === c.id) ?? c),
+        };
+      }),
   });
 
   const cards = events

@@ -9,6 +9,7 @@ import { EVENTS } from "@/lib/data";
 const CARD_H = 84;
 
 const COLS: { round: BracketRound; title: string }[] = [
+  { round: "R32", title: "Round of 32" },
   { round: "R16", title: "Round of 16" },
   { round: "QF", title: "Quarter-Finals" },
   { round: "SF", title: "Semi-Finals" },
@@ -69,6 +70,7 @@ function MatchCard({ m }: { m: MatchEvent }) {
 
 /** Spacer-based bracket: each later round centers its cards against the previous pair. */
 export default function FixtureBracket() {
+  const r32 = byRound("R32");
   const r16 = byRound("R16");
   const qf = byRound("QF");
   const sf = byRound("SF");
@@ -101,11 +103,12 @@ export default function FixtureBracket() {
 
         {/* bracket columns */}
         <div className="flex items-start" style={{ gap: colGap }}>
-          {column(r16, UNIT, 0)}
-          {column(qf, UNIT * 2, UNIT / 2)}
-          {column(sf, UNIT * 4, UNIT * 1.5)}
+          {column(r32, UNIT, 0)}
+          {column(r16, UNIT * 2, UNIT / 2)}
+          {column(qf, UNIT * 4, UNIT * 1.5)}
+          {column(sf, UNIT * 8, UNIT * 3.5)}
           {/* Final + 3rd place stacked */}
-          <div className="shrink-0 flex flex-col gap-4" style={{ paddingTop: UNIT * 3.5 }}>
+          <div className="shrink-0 flex flex-col gap-4" style={{ paddingTop: UNIT * 7.5 }}>
             {final.map((m) => (
               <div key={m.id}>
                 <div className="font-heading font-bold text-[10px] text-accent-soft uppercase tracking-[1px] mb-1.5">🏆 Final</div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import type { MatchEvent, Outcome, Side } from "@bluefin/types";
 import TeamBadge from "@/components/team-badge";
 import FlagIcon, { hasFlag } from "@/components/flag-icon";
@@ -23,12 +24,32 @@ function totalVolume(event: MatchEvent) {
 }
 
 export default function TradeView({
-  event,
+  event: staticEvent,
   initialCategoryId,
 }: {
   event: MatchEvent;
   initialCategoryId?: string;
 }) {
+  // live odds from the API overlay the static fixture (same merge as /markets)
+  const { data: liveEvents } = useQuery<MatchEvent[]>({
+    queryKey: ["markets"],
+    queryFn: async () => {
+      const res = await fetch("/api/markets");
+      if (!res.ok) throw new Error("failed to load markets");
+      return res.json();
+    },
+    refetchInterval: 10_000,
+  });
+  const liveMatch = liveEvents?.find((x) => x.id === staticEvent.id);
+  const event = liveMatch
+    ? {
+        ...staticEvent,
+        categories: staticEvent.categories.map(
+          (c) => liveMatch.categories.find((lc) => lc.id === c.id) ?? c
+        ),
+      }
+    : staticEvent;
+
   const initialCategory =
     event.categories.find((c) => c.id === initialCategoryId) ?? event.categories[0];
   const [slip, setSlip] = useState({
