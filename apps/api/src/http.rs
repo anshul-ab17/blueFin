@@ -23,8 +23,27 @@ pub fn router(state: AppState) -> Router {
         .route("/api/trades", post(crate::trades::post_trade))
         .route("/api/positions/{wallet}", get(crate::trades::positions))
         .route("/api/stream", get(stream))
-        .layer(tower_http::cors::CorsLayer::permissive())
+        .layer(cors())
         .with_state(state)
+}
+
+/// Restrict CORS to ALLOWED_ORIGINS (comma-separated) in production; fall back to
+/// permissive only when the var is unset (local dev).
+fn cors() -> tower_http::cors::CorsLayer {
+    use tower_http::cors::{Any, CorsLayer};
+    match std::env::var("ALLOWED_ORIGINS") {
+        Ok(v) if !v.trim().is_empty() => {
+            let origins: Vec<axum::http::HeaderValue> = v
+                .split(',')
+                .filter_map(|o| o.trim().parse().ok())
+                .collect();
+            CorsLayer::new()
+                .allow_origin(origins)
+                .allow_methods(Any)
+                .allow_headers(Any)
+        }
+        _ => CorsLayer::permissive(),
+    }
 }
 
 async fn health() -> &'static str {
@@ -229,22 +248,28 @@ async fn market_history(
     for (label, _, _) in &rows {
         if !labels.contains(label) { labels.push(label.clone()); }
     }
+    let label_idx: std::collections::HashMap<&str, usize> =
+        labels.iter().enumerate().map(|(i, l)| (l.as_str(), i)).collect();
 
-    // build series: [{ts, values:[pct per label]}]
-    // collect all unique timestamps
-    let mut ts_set: Vec<i64> = rows.iter().map(|(_, _, ts)| *ts).collect();
-    ts_set.dedup();
-
-    let series: Vec<Value> = ts_set.into_iter().map(|ts| {
-        let values: Vec<Value> = labels.iter().map(|l| {
-            rows.iter()
-                .filter(|(rl, _, rts)| rl == l && *rts <= ts)
-                .last()
-                .map(|(_, pct, _)| json!(pct))
-                .unwrap_or(Value::Null)
-        }).collect();
-        json!({ "ts": ts, "values": values })
-    }).collect();
+    // rows are ORDER BY ts ASC: walk once, tracking the latest pct per label, and emit
+    // one snapshot per distinct ts. O(rows + distinct_ts * labels) instead of O(ts * labels * rows).
+    let mut current: Vec<Option<f64>> = vec![None; labels.len()];
+    let mut series: Vec<Value> = Vec::new();
+    let mut i = 0;
+    while i < rows.len() {
+        let ts = rows[i].2;
+        while i < rows.len() && rows[i].2 == ts {
+            if let Some(&idx) = label_idx.get(rows[i].0.as_str()) {
+                current[idx] = Some(rows[i].1);
+            }
+            i += 1;
+        }
+        let values: Vec<Value> = current
+            .iter()
+            .map(|v| v.map(|p| json!(p)).unwrap_or(Value::Null))
+            .collect();
+        series.push(json!({ "ts": ts, "values": values }));
+    }
 
     Ok(Json(json!({
         "marketId": id,
