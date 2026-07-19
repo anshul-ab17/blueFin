@@ -87,6 +87,8 @@ export default function MarketsPage() {
       return res.json();
     },
     initialData: EVENTS,
+    // API serves only live-odds events; overlay them on the full static fixture list
+    select: (live) => EVENTS.map((e) => live.find((l) => l.id === e.id) ?? e),
   });
 
   const cards = events

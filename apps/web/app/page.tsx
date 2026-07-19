@@ -605,10 +605,6 @@ export default function Home() {
                         {m.title}
                       </span>
                     </div>
-                    <span className="inline-flex items-center gap-1.5 font-heading font-bold text-[10px] tracking-[1px] bg-[rgba(34,197,94,0.15)] border border-live text-win px-2 py-[3px] rounded-[10px]">
-                      <LiveDot size={5} />
-                      LIVE
-                    </span>
                   </div>
                   <div className="font-semibold text-xs text-dim group-hover:text-muted transition-colors duration-300">World Cup 2026</div>
                   <div className="flex items-center gap-3">
