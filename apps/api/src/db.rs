@@ -1,10 +1,19 @@
-use sqlx::sqlite::SqlitePoolOptions;
+use sqlx::sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions};
 use sqlx::SqlitePool;
+use std::str::FromStr;
+use std::time::Duration;
 
 pub async fn connect(database_url: &str) -> anyhow::Result<SqlitePool> {
+    // WAL = concurrent readers never block the single writer; busy_timeout makes the
+    // settlement worker and a concurrent trade INSERT queue instead of erroring SQLITE_BUSY.
+    let opts = SqliteConnectOptions::from_str(database_url)?
+        .create_if_missing(true)
+        .journal_mode(SqliteJournalMode::Wal)
+        .busy_timeout(Duration::from_secs(5))
+        .foreign_keys(true);
     let pool = SqlitePoolOptions::new()
         .max_connections(8)
-        .connect(database_url)
+        .connect_with(opts)
         .await?;
     sqlx::migrate!("./migrations").run(&pool).await?;
     Ok(pool)
