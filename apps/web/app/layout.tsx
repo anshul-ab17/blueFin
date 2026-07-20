@@ -30,11 +30,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${spaceGrotesk.variable} ${manrope.variable} h-full antialiased overflow-x-hidden`}>
-      <body className="min-h-full flex flex-col bg-abyss text-fg overflow-x-hidden">
+    <html lang="en" className={`${spaceGrotesk.variable} ${manrope.variable} antialiased overflow-x-clip`}>
+      <body className="min-h-screen flex flex-col bg-abyss text-fg overflow-x-clip">
         <Providers>
           <Nav />
-          <main className="flex-1 overflow-x-hidden">{children}</main>
+          <main className="flex-1 overflow-x-clip">{children}</main>
           <AuthModal />
           <Toast />
         </Providers>
