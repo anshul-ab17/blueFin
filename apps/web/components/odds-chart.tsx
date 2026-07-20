@@ -287,8 +287,8 @@ export default function OddsChart({
   return (
     <div ref={containerRef} className="bg-panel border border-line rounded-[14px] p-5 mb-5">
       {/* header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div className="flex flex-wrap gap-3">
           {fallbackLabels.slice(0, 3).map((label, i) => (
             <div key={label} className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full inline-block" style={{ background: LINE_COLORS[i % LINE_COLORS.length] }} />
@@ -296,7 +296,7 @@ export default function OddsChart({
             </div>
           ))}
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 justify-end sm:justify-start">
           {WINDOWS.map((w) => (
             <button
               key={w}

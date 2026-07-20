@@ -157,7 +157,7 @@ export default function TradeView({
 
       {/* MATCH HEADER */}
       <Reveal>
-        <div className="bg-panel border border-line rounded-2xl px-5 md:px-7 py-[22px] flex flex-wrap items-center justify-center md:justify-between gap-4 mb-[22px]">
+        <div className="bg-panel border border-line rounded-2xl px-5 md:px-7 py-[22px] flex flex-col md:flex-row items-center justify-between gap-4 mb-[22px]">
           <div className="flex items-center gap-4">
             {hasFlag(event.codeA)
               ? <FlagIcon code={event.codeA} size="lg" />
@@ -186,7 +186,7 @@ export default function TradeView({
             </div>
             <div className="font-semibold text-xs text-dim">{event.dateLabel}</div>
           </div>
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-3.5 justify-center md:justify-end">
             {isLive && (
               <span className="inline-flex items-center gap-1.5 font-heading font-bold text-[11px] tracking-[1px] bg-[rgba(34,197,94,0.15)] border border-live text-win px-3 py-[5px] rounded-xl">
                 <LiveDot size={6} />
@@ -236,36 +236,46 @@ export default function TradeView({
                 </div>
                 <div className="flex flex-col gap-2.5">
                   {cat.outcomes.map((row, j) => (
-                    <div key={row.label} className="flex flex-wrap items-center gap-2 md:gap-3.5">
-                      <div className="w-[110px] font-semibold text-[13px] text-soft-fg group-hover:text-fg transition-colors duration-300">{row.label}</div>
-                      <FillBar pct={row.pct} barClass={row.result === "YES" ? "bg-win" : j === 0 ? "bg-accent" : "bg-faint"} />
-                      <span className="font-heading font-bold text-xs text-muted w-9 text-right group-hover:text-accent-soft transition-colors duration-300">{row.pct}%</span>
-                      {isFinished ? (
-                        <span
-                          className={`font-heading font-bold text-[11px] tracking-[0.5px] px-3 py-[7px] rounded-md ${
-                            row.result === "YES"
-                              ? "bg-[rgba(34,197,94,0.15)] border border-live text-win"
-                              : "bg-[#161f2c] border border-line-2 text-dim"
-                          }`}
-                        >
-                          {row.result === "YES" ? "WON" : "LOST"}
-                        </span>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => pick(cat.label, row, "YES")}
-                            className="bg-btn border border-btn-border text-accent-soft font-heading font-bold text-xs px-3 py-[7px] rounded-md cursor-pointer transition-all hover:bg-[#24498a] hover:shadow-[0_0_16px_rgba(77,159,255,0.3)]"
+                    <div key={row.label} className="flex flex-col md:flex-row md:items-center gap-3 md:gap-3.5 border-b border-white/[0.03] last:border-none md:border-none pb-3 md:pb-0">
+                      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3.5 flex-1">
+                        <div className="flex items-center justify-between md:contents">
+                          <div className="md:w-[110px] font-semibold text-[13px] text-soft-fg group-hover:text-fg transition-colors duration-300">{row.label}</div>
+                          <span className="font-heading font-bold text-xs text-muted md:order-2 w-9 text-right group-hover:text-accent-soft transition-colors duration-300 md:hidden">{row.pct}%</span>
+                        </div>
+                        <div className="flex items-center gap-3 flex-1">
+                          <FillBar pct={row.pct} barClass={row.result === "YES" ? "bg-win" : j === 0 ? "bg-accent" : "bg-faint"} />
+                          <span className="hidden md:inline font-heading font-bold text-xs text-muted w-9 text-right group-hover:text-accent-soft transition-colors duration-300">{row.pct}%</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2.5 justify-end md:justify-start">
+                        {isFinished ? (
+                          <span
+                            className={`font-heading font-bold text-[11px] tracking-[0.5px] px-3 py-[7px] rounded-md ${
+                              row.result === "YES"
+                                ? "bg-[rgba(34,197,94,0.15)] border border-live text-win"
+                                : "bg-[#161f2c] border border-line-2 text-dim"
+                            }`}
                           >
-                            YES {row.yesOdds.toFixed(2)}x
-                          </button>
-                          <button
-                            onClick={() => pick(cat.label, row, "NO")}
-                            className="bg-[#161f2c] border border-line-2 text-no font-heading font-bold text-xs px-3 py-[7px] rounded-md cursor-pointer transition-all hover:bg-[#1f2a3a] hover:shadow-[0_0_16px_rgba(217,139,139,0.25)]"
-                          >
-                            NO {row.noOdds.toFixed(2)}x
-                          </button>
-                        </>
-                      )}
+                            {row.result === "YES" ? "WON" : "LOST"}
+                          </span>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => pick(cat.label, row, "YES")}
+                              className="flex-1 md:flex-initial text-center bg-btn border border-btn-border text-accent-soft font-heading font-bold text-xs px-3.5 py-[7px] rounded-md cursor-pointer transition-all hover:bg-[#24498a] hover:shadow-[0_0_16px_rgba(77,159,255,0.3)]"
+                            >
+                              YES {row.yesOdds.toFixed(2)}x
+                            </button>
+                            <button
+                              onClick={() => pick(cat.label, row, "NO")}
+                              className="flex-1 md:flex-initial text-center bg-[#161f2c] border border-line-2 text-no font-heading font-bold text-xs px-3.5 py-[7px] rounded-md cursor-pointer transition-all hover:bg-[#1f2a3a] hover:shadow-[0_0_16px_rgba(217,139,139,0.25)]"
+                            >
+                              NO {row.noOdds.toFixed(2)}x
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -19,10 +19,10 @@ const ECO: Record<string, { name: string; role: string; accent: string; tag: str
 };
 
 const ORBITS = [
-  { id: "superteam", ring: 96, dur: 34, delay: 0 },
-  { id: "solana",    ring: 96, dur: 34, delay: -17 },
-  { id: "tether",    ring: 64, dur: 21, delay: -5.3 },
-  { id: "txodds",    ring: 64, dur: 21, delay: -15.8 },
+  { id: "superteam", ringMobile: 80, ringDesktop: 96, dur: 34, delay: 0 },
+  { id: "solana",    ringMobile: 80, ringDesktop: 96, dur: 34, delay: -17 },
+  { id: "tether",    ringMobile: 54, ringDesktop: 64, dur: 21, delay: -5.3 },
+  { id: "txodds",    ringMobile: 54, ringDesktop: 64, dur: 21, delay: -15.8 },
 ];
 
 function EcosystemSection() {
@@ -117,31 +117,33 @@ function EcosystemSection() {
               {/* Decorative orbit rings */}
               <div
                 data-orbit
-                className="absolute rounded-full border border-dashed border-[#2a3a4d]"
-                style={{ top: "50%", left: "50%", width: "64%", height: "64%", marginLeft: "-32%", marginTop: "-32%", animation: "spin-orbit 90s linear infinite" }}
+                className="absolute top-1/2 left-1/2 rounded-full border border-dashed border-[#2a3a4d] w-[54%] h-[54%] -ml-[27%] -mt-[27%] md:w-[64%] md:h-[64%] md:-ml-[32%] md:-mt-[32%]"
+                style={{ animation: "spin-orbit 90s linear infinite" }}
               />
               <div
                 data-orbit
-                className="absolute rounded-full border border-dashed border-[#22344a]"
-                style={{ top: "50%", left: "50%", width: "96%", height: "96%", marginLeft: "-48%", marginTop: "-48%", animation: "spinrev-orbit 130s linear infinite" }}
+                className="absolute top-1/2 left-1/2 rounded-full border border-dashed border-[#22344a] w-[80%] h-[80%] -ml-[40%] -mt-[40%] md:w-[96%] md:h-[96%] md:-ml-[48%] md:-mt-[48%]"
+                style={{ animation: "spinrev-orbit 130s linear infinite" }}
               />
 
               {/* Orbiting logos */}
               {ORBITS.map((o) => {
-                const half = o.ring / 2;
                 const isOn = sel === o.id;
                 const e = ECO[o.id];
                 return (
                   <div
                     key={o.id}
                     data-orbit
-                    className="absolute pointer-events-none"
+                    className="absolute pointer-events-none top-1/2 left-1/2 orbit-wrapper"
                     style={{
-                      top: "50%", left: "50%",
-                      width: `${o.ring}%`, height: `${o.ring}%`,
-                      marginLeft: `-${half}%`, marginTop: `-${half}%`,
+                      width: `var(--ring-size)`,
+                      height: `var(--ring-size)`,
+                      marginLeft: `calc(var(--ring-size) / -2)`,
+                      marginTop: `calc(var(--ring-size) / -2)`,
+                      "--ring-size-mobile": `${o.ringMobile}%`,
+                      "--ring-size-desktop": `${o.ringDesktop}%`,
                       animation: `spin-orbit ${o.dur}s linear ${o.delay}s infinite`,
-                    }}
+                    } as React.CSSProperties}
                   >
                     {/* Counter-rotate to keep logo upright */}
                     <div
@@ -149,11 +151,11 @@ function EcosystemSection() {
                       className="absolute pointer-events-auto"
                       style={{ top: 0, left: "50%", width: 0, height: 0, animation: `spinrev-orbit ${o.dur}s linear ${o.delay}s infinite` }}
                     >
-                      <div className="absolute flex flex-col items-center gap-1.5" style={{ top: -32, left: -32 }}>
+                      <div className="absolute flex flex-col items-center gap-1.5 top-[-26px] left-[-26px] md:top-[-33px] md:left-[-33px]">
                         <button
                           onMouseEnter={() => setSel(o.id)}
                           onClick={() => setSel(o.id)}
-                          className="w-[66px] h-[66px] rounded-2xl border bg-[#0c1828] overflow-hidden flex items-center justify-center p-2.5 cursor-pointer transition-all duration-300 hover:scale-110"
+                          className="w-[52px] h-[52px] md:w-[66px] md:h-[66px] rounded-2xl border bg-[#0c1828] overflow-hidden flex items-center justify-center p-2.5 cursor-pointer transition-all duration-300 hover:scale-110"
                           style={{
                             borderColor: isOn ? e.accent : "#1e3048",
                             boxShadow: isOn ? `0 0 20px ${e.accent}66, 0 4px 16px rgba(4,10,18,0.8)` : "0 4px 16px rgba(4,10,18,0.7)",
@@ -162,7 +164,7 @@ function EcosystemSection() {
                           <img src={e.img} alt={e.name} className="w-full h-full object-contain" />
                         </button>
                         <span
-                          className="font-heading font-bold text-[10px] tracking-[0.8px] bg-[rgba(8,16,28,0.9)] px-2 py-0.5 rounded-md whitespace-nowrap transition-colors duration-300 border border-[#1e3048]"
+                          className="font-heading font-bold text-[9px] md:text-[10px] tracking-[0.8px] bg-[rgba(8,16,28,0.9)] px-2 py-0.5 rounded-md whitespace-nowrap transition-colors duration-300 border border-[#1e3048]"
                           style={{ color: isOn ? e.accent : "#4a6280" }}
                         >
                           {o.id === "txodds" ? "TXLINE" : e.name.split(" ")[0].toUpperCase()}
@@ -178,7 +180,7 @@ function EcosystemSection() {
                 <button
                   onMouseEnter={() => setSel("bluefin")}
                   onClick={() => setSel("bluefin")}
-                  className="w-[112px] h-[112px] rounded-full border-2 bg-[#0c1828] overflow-hidden flex items-center justify-center p-3 cursor-pointer transition-all duration-300"
+                  className="w-[80px] h-[80px] md:w-[112px] md:h-[112px] rounded-full border bg-[#0c1828] overflow-hidden flex items-center justify-center p-2 md:p-3 cursor-pointer transition-all duration-300"
                   style={{
                     borderColor: sel === "bluefin" ? "#4d9fff" : "#2f5fa8",
                     animation: "glowpulse 3.5s ease-in-out infinite",
@@ -187,7 +189,7 @@ function EcosystemSection() {
                   <img src="/assets/logos/bluefin_dark.png" alt="Bluefin" className="w-full h-full object-contain" style={{ animation: "bobfloat 4s ease-in-out infinite" }} />
                 </button>
                 <span
-                  className="font-heading font-bold text-[11px] tracking-[1px] bg-[rgba(10,20,31,0.82)] px-2.5 py-0.5 rounded-md transition-colors duration-300"
+                  className="font-heading font-bold text-[10px] md:text-[11px] tracking-[1px] bg-[rgba(10,20,31,0.82)] px-2.5 py-0.5 rounded-md transition-colors duration-300"
                   style={{ color: sel === "bluefin" ? "#4d9fff" : "#93a7bc" }}
                 >
                   BLUEFIN

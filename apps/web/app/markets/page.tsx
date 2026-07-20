@@ -230,7 +230,7 @@ export default function MarketsPage() {
                 <span className="font-heading font-bold text-xs text-muted min-w-8 text-right group-hover:text-accent-soft transition-colors duration-300">{top.pct}%</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <div className="flex-1 font-semibold text-[13px] text-muted group-hover:text-soft-fg transition-colors duration-300">{top.label}</div>
+                <div className="flex-1 font-semibold text-[13px] text-muted group-hover:text-soft-fg transition-colors duration-300 truncate">{top.label}</div>
                 <div className="bg-btn border border-btn-border text-accent-soft font-heading font-bold text-xs px-2.5 py-1.5 rounded-md">
                   YES {top.yesOdds.toFixed(2)}x
                 </div>
